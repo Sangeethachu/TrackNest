@@ -17,7 +17,7 @@ const Splash = () => {
                 <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-xl mb-6 rotate-12">
                     <span className="text-3xl">💸</span>
                 </div>
-                <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Expenso.</h1>
+                <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">TrackNest.</h1>
                 <p className="text-indigo-100 text-lg">Master your money,<br />effortlessly.</p>
             </div>
 

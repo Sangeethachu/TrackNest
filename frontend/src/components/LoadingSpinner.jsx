@@ -21,7 +21,7 @@ const LoadingSpinner = ({ fullPage = false }) => {
             {/* Loading Text */}
             <div className="flex flex-col items-center">
                 <p className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent animate-pulse tracking-wide">
-                    Expenso
+                    TrackNest
                 </p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
                     Loading your financial world...
