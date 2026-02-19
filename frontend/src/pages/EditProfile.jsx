@@ -4,6 +4,26 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+const getRealisticAvatar = (name) => {
+    if (!name || name === 'User') return 'https://api.dicebear.com/7.x/avataaars/svg?seed=James&backgroundColor=f8fafc';
+
+    const maleSeeds = ['George', 'Kaden', 'James', 'Frank', 'Jack', 'Toby'];
+    const femaleSeeds = ['Abby', 'Jocelyn', 'Kimberly', 'Eliza', 'Sara', 'Mimi'];
+
+    const lowName = name.toLowerCase();
+    const isMale = /(mr|sir|father|uncle|grandpa|boy|man|bro|he|him|john|james|robert|michael|william|david|richard|joseph|thomas|charles|george|kumar|raj|sanjay|amit|sangeeth)/i.test(lowName);
+    const isFemale = /(mrs|ms|lady|mother|aunt|grandma|girl|woman|sis|she|her|mary|patricia|jennifer|linda|elizabeth|barbara|susan|jessica|sarah|karen|priya|anitha|sunitha|deepa|shanti)/i.test(lowName) || lowName.endsWith('a');
+
+    const pool = isMale ? maleSeeds : (isFemale ? femaleSeeds : [...maleSeeds, ...femaleSeeds]);
+
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % pool.length;
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${pool[index]}&backgroundColor=f8fafc`;
+};
+
 const EditProfile = () => {
     const navigate = useNavigate();
     const [name, setName] = useState('');
@@ -13,11 +33,24 @@ const EditProfile = () => {
     const [saving, setSaving] = useState(false);
 
     const avatars = [
-        'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix',
-        'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka',
-        'https://api.dicebear.com/7.x/avataaars/svg?seed=Jasper',
-        'https://api.dicebear.com/7.x/avataaars/svg?seed=Willow',
-        'https://api.dicebear.com/7.x/avataaars/svg?seed=Oliver'
+        // Men/Uncles
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=George&backgroundColor=f8fafc',
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=Kaden&backgroundColor=f8fafc',
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=James&backgroundColor=f8fafc',
+        // Women/Aunties
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=Abby&backgroundColor=f8fafc',
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=Jocelyn&backgroundColor=f8fafc',
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=Kimberly&backgroundColor=f8fafc',
+        // Boys
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=Toby&backgroundColor=f8fafc',
+        // Girls
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=Mimi&backgroundColor=f8fafc',
+        // Grandpas
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=Frank&backgroundColor=f8fafc',
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=Jack&backgroundColor=f8fafc',
+        // Grandmas
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=Eliza&backgroundColor=f8fafc',
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=Sara&backgroundColor=f8fafc',
     ];
 
     useEffect(() => {
@@ -78,9 +111,9 @@ const EditProfile = () => {
                 <div className="flex flex-col items-center mb-8">
                     <div className="w-28 h-28 bg-gray-200 rounded-full overflow-hidden border-4 border-white shadow-md mb-4 dark:border-gray-700">
                         <img
-                            src={selectedAvatar}
+                            src={selectedAvatar || getRealisticAvatar(name)}
                             alt="Profile"
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover bg-slate-50 dark:bg-gray-800"
                         />
                     </div>
 

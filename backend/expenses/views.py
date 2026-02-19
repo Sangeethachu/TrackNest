@@ -16,10 +16,15 @@ from .serializers import (
 @permission_classes([permissions.AllowAny])
 def home(request):
     return JsonResponse({
-        "status": "TrackNest API is running",
-        "documentation": "/api/",
-        "admin": "/admin/"
+        "status": "online",
+        "version": "1.2.4",
+        "timestamp": timezone.now().isoformat()
     })
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def health_check(request):
+    return Response({"status": "healthy"}, status=200)
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])

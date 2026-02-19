@@ -6,6 +6,26 @@ import MonthlyBudgetProgress from '../components/MonthlyBudgetProgress';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { formatCurrency } from './Home';
 
+const getRealisticAvatar = (name) => {
+    if (!name || name === 'User') return 'https://api.dicebear.com/7.x/avataaars/svg?seed=James&backgroundColor=f8fafc';
+
+    const maleSeeds = ['George', 'Kaden', 'James', 'Frank', 'Jack', 'Toby'];
+    const femaleSeeds = ['Abby', 'Jocelyn', 'Kimberly', 'Eliza', 'Sara', 'Mimi'];
+
+    const lowName = name.toLowerCase();
+    const isMale = /(mr|sir|father|uncle|grandpa|boy|man|bro|he|him|john|james|robert|michael|william|david|richard|joseph|thomas|charles|george|kumar|raj|sanjay|amit|sangeeth)/i.test(lowName);
+    const isFemale = /(mrs|ms|lady|mother|aunt|grandma|girl|woman|sis|she|her|mary|patricia|jennifer|linda|elizabeth|barbara|susan|jessica|sarah|karen|priya|anitha|sunitha|deepa|shanti)/i.test(lowName) || lowName.endsWith('a');
+
+    const pool = isMale ? maleSeeds : (isFemale ? femaleSeeds : [...maleSeeds, ...femaleSeeds]);
+
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % pool.length;
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${pool[index]}&backgroundColor=f8fafc`;
+};
+
 const Profile = () => {
     const navigate = useNavigate();
     const [dashboardData, setDashboardData] = useState(null);
@@ -56,9 +76,9 @@ const Profile = () => {
                     <div className="relative mb-4">
                         <div className="w-24 h-24 bg-gradient-to-tr from-purple-500 to-indigo-600 rounded-full p-1">
                             <img
-                                src={user.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=User"}
+                                src={user.avatar || getRealisticAvatar(user.name)}
                                 alt="Profile"
-                                className="w-full h-full rounded-full border-4 border-white bg-white"
+                                className="w-full h-full rounded-full border-4 border-white bg-slate-50 dark:bg-gray-800 transition-all duration-300"
                             />
                         </div>
                         <button

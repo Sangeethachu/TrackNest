@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/webhook/sms/', views.sms_webhook, name='sms_webhook'),
     path('api/reset-data/', views.reset_data, name='reset_data'),
+    path('api/health-check/', views.health_check, name='health_check'),
     path('api/user/', views.current_user, name='current_user'),
     path('api/update-profile/', views.update_profile, name='update_profile'),
     path('api/', include(router.urls)),

@@ -17,6 +17,7 @@ import Splash from './pages/Splash';
 import AddTransaction from './pages/AddTransaction';
 import AddSavingsGoal from './pages/AddSavingsGoal';
 import BottomNav from './components/BottomNav';
+import api from './api';
 
 // Protected Route Component
 const ProtectedRoute = () => {
@@ -48,6 +49,25 @@ const AuthLayout = () => {
 };
 
 function App() {
+  // Stealth Keep-Alive for Render (Ping every 14 mins)
+  React.useEffect(() => {
+    const keepAlive = async () => {
+      try {
+        await api.get('/health-check/');
+        console.log('Heartbeat: System healthy');
+      } catch (err) {
+        // Silent fail
+      }
+    };
+
+    // Initial ping
+    keepAlive();
+
+    // 14 minutes interval (840,000 ms)
+    const interval = setInterval(keepAlive, 14 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="App">
       <BrowserRouter>
