@@ -19,4 +19,4 @@ COPY backend/ /app/
 EXPOSE 8000
 
 # Run migrations and then the application
-CMD python manage.py migrate && gunicorn --bind 0.0.0.0:8000 expense_tracker.wsgi:application
+CMD python manage.py migrate && python manage.py seed_data && gunicorn --bind 0.0.0.0:8000 expense_tracker.wsgi:application
