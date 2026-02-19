@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Transaction, Category, PaymentMethod, SavingsGoal, UserProfile
+from .models import Transaction, Category, PaymentMethod, SavingsGoal, UserProfile, Notification
 from django.contrib.auth.models import User
 
 class PaymentMethodSerializer(serializers.ModelSerializer):
@@ -54,4 +54,9 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'profile']
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'title', 'message', 'notification_type', 'is_read', 'created_at']
 

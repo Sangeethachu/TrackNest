@@ -37,3 +37,10 @@ psycopg2-binary>=2.9.10
 dj-database-url==2.3.0
 whiteNoise==6.9.0
 djangorestframework-simplejwt==5.3.1
+djangorestframework
+djangorestframework-simplejwt
+dj-database-url
+whitenoise
+gunicorn
+psycopg2-binary
+django-cors-headers

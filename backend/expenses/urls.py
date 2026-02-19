@@ -10,6 +10,7 @@ router.register(r'categories', views.CategoryViewSet, basename='category')
 router.register(r'payment-methods', views.PaymentMethodViewSet)
 router.register(r'savings-goals', views.SavingsGoalViewSet, basename='savings-goal')
 router.register(r'monthly-budget', views.MonthlyBudgetView, basename='monthly-budget')
+router.register(r'notifications', views.NotificationViewSet, basename='notification')
 
 
 from rest_framework_simplejwt.views import (

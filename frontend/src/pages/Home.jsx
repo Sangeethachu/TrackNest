@@ -239,7 +239,10 @@ const Home = () => {
                 <p className="font-semibold text-gray-900 dark:text-white">{user.name}</p>
               </div>
             </div>
-            <button className="p-2 bg-white/50 dark:bg-gray-800/50 rounded-full shadow-sm hover:shadow-md transition-all border border-white/50 dark:border-gray-700 hover-ring backdrop-blur-sm">
+            <button
+              onClick={() => navigate('/notifications')}
+              className="p-2 bg-white/50 dark:bg-gray-800/50 rounded-full shadow-sm hover:shadow-md transition-all border border-white/50 dark:border-gray-700 hover-ring backdrop-blur-sm"
+            >
               <Bell size={24} className="text-gray-700 dark:text-gray-200" />
             </button>
           </div>

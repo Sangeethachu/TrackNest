@@ -16,6 +16,7 @@ import Signup from './pages/Signup';
 import Splash from './pages/Splash';
 import AddTransaction from './pages/AddTransaction';
 import AddSavingsGoal from './pages/AddSavingsGoal';
+import Notifications from './pages/Notifications';
 import BottomNav from './components/BottomNav';
 import api from './api';
 
@@ -88,6 +89,7 @@ function App() {
               <Route path="/budget" element={<Budget />} />
               <Route path="/add-transaction" element={<AddTransaction />} />
               <Route path="/add-goal" element={<AddSavingsGoal />} />
+              <Route path="/notifications" element={<Notifications />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/edit-profile" element={<EditProfile />} />
               <Route path="/payment-methods" element={<PaymentMethods />} />
