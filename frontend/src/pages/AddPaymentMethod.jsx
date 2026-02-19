@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, Check, Smartphone, CreditCard, Wallet, Banknote } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../api';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const colors = [
     'bg-blue-500', 'bg-indigo-600', 'bg-sky-400',
@@ -69,6 +70,10 @@ const AddPaymentMethod = () => {
             setLoading(false);
         }
     };
+
+    if (loading && isEdit) {
+        return <LoadingSpinner fullPage={true} />;
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 pb-24">

@@ -4,6 +4,7 @@ import * as LucideIcons from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import api from '../api';
+import LoadingSpinner from '../components/LoadingSpinner';
 import { useState, useEffect } from 'react';
 import { formatCurrency } from './Home'; // Reuse helper
 import { Button } from '../components/ui/button';
@@ -89,6 +90,10 @@ const Budget = () => {
 
   // Palette from mock data to preserve the "old UI" look
   const COLORS = ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#fb923c', '#fbbf24', '#ec4899', '#6366f1'];
+
+  if (loading) {
+    return <LoadingSpinner fullPage={true} />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">

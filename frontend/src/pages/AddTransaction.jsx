@@ -3,6 +3,7 @@ import { ChevronLeft, Calendar, FileText, Check, CreditCard, Wallet, Banknote, S
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import * as LucideIcons from 'lucide-react';
 import api from '../api';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const AddTransaction = () => {
     const navigate = useNavigate();
@@ -128,6 +129,10 @@ const AddTransaction = () => {
         }
         return colors[Math.abs(hash) % colors.length];
     };
+
+    if (loading) {
+        return <LoadingSpinner fullPage={true} />;
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 pb-24">
