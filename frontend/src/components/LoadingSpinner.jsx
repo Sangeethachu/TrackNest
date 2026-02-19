@@ -9,7 +9,7 @@ const LoadingSpinner = ({ fullPage = false }) => {
                 <div className="absolute inset-2 border-4 border-indigo-100 dark:border-indigo-800/20 rounded-full animate-ping opacity-20"></div>
 
                 {/* Loader Image */}
-                <div className="absolute inset-0 flex items-center justify-center animate-bounce-slow">
+                <div className="absolute inset-0 flex items-center justify-center animate-logo-run">
                     <img
                         src="/app_loader_icon.png"
                         alt="Loading..."

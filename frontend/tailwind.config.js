@@ -80,12 +80,27 @@ module.exports = {
 						transform: 'translateY(0)',
 						animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)'
 					}
+				},
+				'logo-run': {
+					'0%, 100%': {
+						transform: 'translateX(0) skewX(0deg)',
+					},
+					'25%': {
+						transform: 'translateX(5px) skewX(-2deg)',
+					},
+					'50%': {
+						transform: 'translateX(-2px) skewX(1deg)',
+					},
+					'75%': {
+						transform: 'translateX(3px) skewX(-1deg)',
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'bounce-slow': 'bounce-slow 3s infinite'
+				'bounce-slow': 'bounce-slow 3s infinite',
+				'logo-run': 'logo-run 0.5s infinite linear'
 			}
 		}
 	},
