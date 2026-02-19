@@ -104,6 +104,16 @@ _db_url = os.environ.get('DATABASE_URL', '')
 if _db_url:
     # Remove accidental brackets, quotes, or trailing/leading whitespace
     _db_url = _db_url.replace('[', '').replace(']', '').replace('"', '').replace("'", "").strip()
+    
+    # AUTO-FIX: If we detect the old Supabase direct host on port 5432, 
+    # we log a massive warning because it definitely won't work on Render.
+    if 'supabase.co' in _db_url and ':5432' in _db_url:
+        print("\n" + "!"*60)
+        print("CRITICAL DATABASE CONFIGURATION ERROR DETECTED")
+        print("You are using the DIRECT Supabase URL on port 5432.")
+        print("Render DOES NOT support this. You MUST use the 'Session Pooler' URL (Port 6543).")
+        print("Please check your Setup Guide for the correct URL format.")
+        print("!"*60 + "\n")
 
 DATABASES = {
     'default': dj_database_url.parse(
