@@ -9,15 +9,20 @@ const api = axios.create({
 });
 
 const cache = {};
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 30 * 1000; // Reduce TTL for authenticated session freshness
 
-// Request interceptor to serve from cache
+// Request interceptor: add token and serve from cache
 api.interceptors.request.use((config) => {
+    // Add token to headers
+    const token = localStorage.getItem('access_token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+
     // Only fetch from cache if it's a GET request
     if (config.method === 'get') {
         const cached = cache[config.url];
         if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
-            // Inject an adapter to return cached data without hitting the network
             config.adapter = () => {
                 return Promise.resolve({
                     data: cached.data,
@@ -32,23 +37,29 @@ api.interceptors.request.use((config) => {
     return config;
 }, (error) => Promise.reject(error));
 
-// Response interceptor to store in cache or invalidate
+// Response interceptor: handle 401 and store cache
 api.interceptors.response.use((response) => {
     const { config } = response;
 
     if (config.method === 'get' && !response.statusText?.includes('from cache')) {
-        // Store the fresh data in cache
         cache[config.url] = {
             data: response.data,
             timestamp: Date.now()
         };
     } else if (['post', 'put', 'patch', 'delete'].includes(config.method)) {
-        // Invalidate the entire cache if data is modified
         Object.keys(cache).forEach(key => delete cache[key]);
     }
 
     return response;
 }, (error) => {
+    // If 401, token is invalid or expired
+    if (error.response?.status === 401) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/signup')) {
+            window.location.href = '/login';
+        }
+    }
     return Promise.reject(error);
 });
 

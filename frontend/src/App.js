@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import { BrowserRouter, Routes, Route, Outlet, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Transactions from './pages/Transactions';
 import Stats from './pages/Stats';
@@ -17,6 +17,17 @@ import Splash from './pages/Splash';
 import AddTransaction from './pages/AddTransaction';
 import AddSavingsGoal from './pages/AddSavingsGoal';
 import BottomNav from './components/BottomNav';
+
+// Protected Route Component
+const ProtectedRoute = () => {
+  const token = localStorage.getItem('access_token');
+
+  if (!token) {
+    return <Navigate to="/splash" replace />;
+  }
+
+  return <Outlet />;
+};
 
 // Layout component to include BottomNav only on main pages
 const MainLayout = () => {
@@ -49,21 +60,26 @@ function App() {
           </Route>
 
           {/* Private Routes (With Bottom Nav) */}
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/transactions" element={<Transactions />} />
-            <Route path="/stats" element={<Stats />} />
-            <Route path="/budget" element={<Budget />} />
-            <Route path="/add-transaction" element={<AddTransaction />} />
-            <Route path="/add-goal" element={<AddSavingsGoal />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/edit-profile" element={<EditProfile />} />
-            <Route path="/payment-methods" element={<PaymentMethods />} />
-            <Route path="/add-payment-method" element={<AddPaymentMethod />} />
-            <Route path="/edit-payment-method/:id" element={<AddPaymentMethod />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/help" element={<HelpSupport />} />
+          <Route element={<ProtectedRoute />}>
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/transactions" element={<Transactions />} />
+              <Route path="/stats" element={<Stats />} />
+              <Route path="/budget" element={<Budget />} />
+              <Route path="/add-transaction" element={<AddTransaction />} />
+              <Route path="/add-goal" element={<AddSavingsGoal />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/edit-profile" element={<EditProfile />} />
+              <Route path="/payment-methods" element={<PaymentMethods />} />
+              <Route path="/add-payment-method" element={<AddPaymentMethod />} />
+              <Route path="/edit-payment-method/:id" element={<AddPaymentMethod />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/help" element={<HelpSupport />} />
+            </Route>
           </Route>
+
+          {/* Redirect all unknown routes to home (which redirects to splash if not logged in) */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </div>

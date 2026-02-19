@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Splash = () => {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            navigate('/');
+        }
+    }, [navigate]);
 
     return (
         <div className="min-h-screen bg-indigo-600 flex flex-col items-center justify-between py-12 px-6 relative overflow-hidden">

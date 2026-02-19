@@ -115,20 +115,20 @@ const Profile = () => {
                             <div
                                 key={index}
                                 onClick={() => item.path && navigate(item.path)}
-                                className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors ${index !== menuItems.length - 1 ? 'border-b border-gray-100' : ''
+                                className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors ${index !== menuItems.length - 1 ? 'border-b border-gray-100 dark:border-gray-700' : ''
                                     }`}
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-600">
+                                    <div className="w-10 h-10 bg-gray-50 dark:bg-gray-700 rounded-xl flex items-center justify-center text-gray-600 dark:text-gray-300">
                                         <Icon size={20} />
                                     </div>
-                                    <span className="font-medium text-gray-900">{item.label}</span>
+                                    <span className="font-medium text-gray-900 dark:text-white">{item.label}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     {item.value && (
-                                        <span className="text-xs text-gray-400 font-medium">{item.value}</span>
+                                        <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">{item.value}</span>
                                     )}
-                                    <ChevronRight size={18} className="text-gray-300" />
+                                    <ChevronRight size={18} className="text-gray-300 dark:text-gray-600" />
                                 </div>
                             </div>
                         );
@@ -136,7 +136,14 @@ const Profile = () => {
                 </div>
 
                 <div className="px-4 pb-4">
-                    <button className="w-full bg-white rounded-2xl p-4 flex items-center justify-center gap-2 text-red-500 hover:bg-red-50 transition-colors shadow-sm font-medium">
+                    <button
+                        onClick={() => {
+                            localStorage.removeItem('access_token');
+                            localStorage.removeItem('refresh_token');
+                            navigate('/splash');
+                        }}
+                        className="w-full bg-white dark:bg-gray-800 rounded-2xl p-4 flex items-center justify-center gap-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shadow-sm font-medium border border-transparent dark:border-gray-700"
+                    >
                         <LogOut size={20} />
                         Log Out
                     </button>

@@ -25,3 +25,4 @@ staticfiles/
 # Misc
 .DS_Store
 .gemini/
+backend/server_log.txt

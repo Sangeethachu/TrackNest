@@ -1,54 +1,52 @@
-from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.db.models import Sum, F
-from .models import Transaction, Category, PaymentMethod, SavingsGoal, UserProfile
+from .models import Transaction, Category, PaymentMethod, SavingsGoal, UserProfile, MonthlyBudget
 from django.contrib.auth.models import User
 from decimal import Decimal, InvalidOperation
-from rest_framework import status, viewsets
-from rest_framework.decorators import api_view, action
+from rest_framework import status, viewsets, permissions
+from rest_framework.decorators import api_view, action, permission_classes
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import (
+    TransactionSerializer, CategorySerializer, PaymentMethodSerializer, 
+    SavingsGoalSerializer, MonthlyBudgetSerializer, UserSerializer
+)
 
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
 def home(request):
     return JsonResponse({
-        "status": "Expense Tracker API is running",
+        "status": "TrackNest API is running",
         "documentation": "/api/",
         "admin": "/admin/"
     })
 
-def get_default_user():
-    from django.contrib.auth.models import User
-    user = User.objects.all().order_by('id').first()
-    if not user:
-        # Create a default admin user if none exists (for single-user mode)
-        user = User.objects.create_user(username='admin', email='admin@example.com', password='password123')
-        user.is_staff = True
-        user.is_superuser = True
-        user.save()
-        
-        # Ensure profile exists
-        from .models import UserProfile
-        if not hasattr(user, 'profile'):
-            UserProfile.objects.get_or_create(user=user, defaults={'avatar_url': f'https://api.dicebear.com/7.x/avataaars/svg?seed={user.username}'})
-    return user
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def register_user(request):
+    username = request.data.get('username')
+    email = request.data.get('email')
+    password = request.data.get('password')
+    first_name = request.data.get('first_name', '')
 
-from .forms import TransactionForm
-from django.shortcuts import redirect
+    if not username or not password or not email:
+        return Response({'error': 'Please provide username, email and password'}, status=status.HTTP_400_BAD_REQUEST)
 
-def add_transaction(request):
-    if request.method == 'POST':
-        form = TransactionForm(request.POST)
-        if form.is_valid():
-            transaction = form.save(commit=False)
-            # Default to admin user if not logged in (for now)
-            if not request.user.is_authenticated:
-                transaction.user = get_default_user()
-            else:
-                transaction.user = request.user
-            transaction.save()
-            return redirect('expenses:home')
-    else:
-        form = TransactionForm()
+    if User.objects.filter(username=username).exists():
+        return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user = User.objects.create_user(username=username, email=email, password=password, first_name=first_name)
+    UserProfile.objects.create(user=user, avatar_url=f'https://api.dicebear.com/7.x/avataaars/svg?seed={username}')
     
-    return render(request, 'expenses/add_transaction.html', {'form': form})
+    refresh = RefreshToken.for_user(user)
+    return Response({
+        'status': 'success',
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+        'user': UserSerializer(user).data
+    }, status=status.HTTP_201_CREATED)
+
+# Removed add_transaction and get_default_user for security. Use API.
 
 from django.db.models import Sum
 
@@ -150,7 +148,11 @@ def sms_webhook(request):
                 payment_method.icon = icon_url
                 payment_method.save()
 
-            # Create Transaction
+            # Create Transaction for the user associated with sender (for now we still use first user for demo SMS, but ideally we'd link phone to user)
+            user = User.objects.first() # DEMO ONLY
+            if not user:
+                return JsonResponse({'status': 'error', 'message': 'No user available for SMS logging'}, status=400)
+
             transaction = Transaction.objects.create(
                 user=user,
                 title=parsed.get('title', 'Unknown Merchant'),
@@ -189,9 +191,9 @@ def reset_data(request):
     Keeps Categories and PaymentMethods as they are structural.
     """
     try:
-        Transaction.objects.all().delete()
-        MonthlyBudget.objects.all().delete()
-        SavingsGoal.objects.all().delete()
+        Transaction.objects.filter(user=request.user).delete()
+        MonthlyBudget.objects.filter(user=request.user).delete()
+        SavingsGoal.objects.filter(user=request.user).delete()
         
         # Optional: Reset category budget limits to 0
         Category.objects.update(budget_limit=0)
@@ -202,16 +204,12 @@ def reset_data(request):
 
 class MonthlyBudgetView(viewsets.ViewSet):
     def list(self, request):
-        # Ensure user exists (dev mode fallback)
-        user = request.user if request.user.is_authenticated else get_default_user()
-        budget, created = MonthlyBudget.objects.get_or_create(user=user)
+        budget, created = MonthlyBudget.objects.get_or_create(user=request.user)
         serializer = MonthlyBudgetSerializer(budget)
         return Response(serializer.data)
 
     def create(self, request):
-        user = request.user if request.user.is_authenticated else get_default_user()
-        budget, created = MonthlyBudget.objects.get_or_create(user=user)
-        
+        budget, created = MonthlyBudget.objects.get_or_create(user=request.user)
         amount = request.data.get('amount')
         if amount is not None:
             budget.amount = amount
@@ -220,15 +218,12 @@ class MonthlyBudgetView(viewsets.ViewSet):
         return Response({'error': 'Amount is required'}, status=400)
 
 class TransactionViewSet(viewsets.ModelViewSet):
-    queryset = Transaction.objects.all().order_by('-date')
     serializer_class = TransactionSerializer
+    def get_queryset(self):
+        return Transaction.objects.filter(user=self.request.user).order_by('-date')
 
     def perform_create(self, serializer):
-        # Fallback to first user if not authenticated (dev mode)
-        if self.request.user.is_authenticated:
-            serializer.save(user=self.request.user)
-        else:
-            serializer.save(user=get_default_user())
+        serializer.save(user=self.request.user)
 
     @action(detail=False, methods=['get'])
     def dashboard_stats(self, request):
@@ -272,8 +267,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
             })
         
         # Calculate total budget from MonthlyBudget model
-        user = request.user if request.user.is_authenticated else get_default_user()
-        monthly_budget, _ = MonthlyBudget.objects.get_or_create(user=user)
+        monthly_budget, _ = MonthlyBudget.objects.get_or_create(user=request.user)
         total_budget = monthly_budget.amount
 
         return Response({
@@ -387,8 +381,11 @@ class TransactionViewSet(viewsets.ModelViewSet):
         })
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
     serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        # Categories are global for now, but we use get_queryset for consistency
+        return Category.objects.all()
 
     @action(detail=False, methods=['get'])
     def budget_stats(self, request):
@@ -422,14 +419,12 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
     serializer_class = PaymentMethodSerializer
 
 class SavingsGoalViewSet(viewsets.ModelViewSet):
-    queryset = SavingsGoal.objects.all().order_by('-created_at')
     serializer_class = SavingsGoalSerializer
+    def get_queryset(self):
+        return SavingsGoal.objects.filter(user=self.request.user).order_by('-created_at')
 
     def perform_create(self, serializer):
-        if self.request.user.is_authenticated:
-            serializer.save(user=self.request.user)
-        else:
-            serializer.save(user=get_default_user())
+        serializer.save(user=self.request.user)
 
     @action(detail=True, methods=['post'])
     def add_amount(self, request, pk=None):
@@ -452,44 +447,17 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
 
 @api_view(['GET'])
 def current_user(request):
-    """
-    Returns the current authenticated user's details.
-    """
-    if request.user.is_authenticated:
-        user = request.user
-    else:
-        user = get_default_user()
-    
-    if not user:
-        return Response({
-            'id': 0,
-            'username': 'Guest',
-            'email': 'guest@example.com',
-            'profile': {
-                'avatar_url': 'https://api.dicebear.com/7.x/avataaars/svg?seed=Guest'
-            }
-        })
-
+    user = request.user
     # Ensure profile exists
     if not hasattr(user, 'profile'):
-        UserProfile.objects.create(user=user, avatar_url=f'https://api.dicebear.com/7.x/avataaars/svg?seed={user.username}')
+        UserProfile.objects.get_or_create(user=user, defaults={'avatar_url': f'https://api.dicebear.com/7.x/avataaars/svg?seed={user.username}'})
 
-    from .serializers import UserSerializer
     serializer = UserSerializer(user)
     return Response(serializer.data)
 
 @api_view(['POST', 'PUT', 'PATCH'])
 def update_profile(request):
-    """
-    Updates the current user's profile info.
-    """
-    if request.user.is_authenticated:
-        user = request.user
-    else:
-        user = get_default_user()
-        
-    if not user:
-        return Response({'error': 'No user found'}, status=status.HTTP_404_NOT_FOUND)
+    user = request.user
 
     # Ensure profile exists
     profile, created = UserProfile.objects.get_or_create(user=user)
