@@ -14,8 +14,12 @@ const Splash = () => {
             </div>
 
             <div className="z-10 flex flex-col items-center text-center mt-12">
-                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-xl mb-6 rotate-12">
-                    <span className="text-3xl">💸</span>
+                <div className="mb-6 drop-shadow-xl animate-bounce-slow">
+                    <img
+                        src="/app_loader_icon.png"
+                        alt="TrackNest Logo"
+                        className="w-32 h-32 object-contain"
+                    />
                 </div>
                 <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">TrackNest.</h1>
                 <p className="text-indigo-100 text-lg">Master your money,<br />effortlessly.</p>
