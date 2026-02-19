@@ -11,7 +11,6 @@ const Notifications = () => {
 
     useEffect(() => {
         fetchNotifications();
-        markAllRead();
     }, []);
 
     const fetchNotifications = async () => {
