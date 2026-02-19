@@ -11,6 +11,7 @@ const Notifications = () => {
 
     useEffect(() => {
         fetchNotifications();
+        markAllRead();
     }, []);
 
     const fetchNotifications = async () => {
@@ -103,8 +104,8 @@ const Notifications = () => {
                             <div
                                 key={notification.id}
                                 className={`bg-white dark:bg-gray-800 p-4 rounded-xl border transition-all relative group ${notification.is_read
-                                        ? 'border-gray-100 dark:border-gray-700 opacity-75'
-                                        : 'border-indigo-100 dark:border-indigo-900/50 shadow-sm ring-1 ring-indigo-50 dark:ring-indigo-900/20'
+                                    ? 'border-gray-100 dark:border-gray-700 opacity-75'
+                                    : 'border-indigo-100 dark:border-indigo-900/50 shadow-sm ring-1 ring-indigo-50 dark:ring-indigo-900/20'
                                     }`}
                                 onClick={() => !notification.is_read && markAsRead(notification.id)}
                             >
