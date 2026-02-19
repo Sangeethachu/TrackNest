@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex items-center justify-between mb-8 pt-2 relative">
+    <a href="{% url 'expenses:home' %}"
+        class="p-2 rounded-full bg-white shadow-sm hover:bg-gray-50 transition border border-gray-100 text-gray-800">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+    </a>
+    <h2 class="text-lg font-bold text-gray-900 absolute left-1/2 transform -translate-x-1/2">Monthly budget</h2>
+    <div class="w-9"></div> <!-- Spacer for centering -->
+</div>
+
+<!-- Chart Section -->
+<div class="relative w-64 h-32 mx-auto mb-8">
+    <!-- Semi Circle Gauge -->
+    <div class="w-full h-full overflow-hidden relative z-10">
+        <svg viewBox="0 0 100 50" class="w-full h-full transform transition-all duration-1000 ease-out">
+            <!-- Background Arc -->
+            <path d="M10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#F3F4F6" stroke-width="10"
+                stroke-linecap="round" />
+            <!-- Segments (Simulated) -->
+            <path d="M10 50 A 40 40 0 0 1 25 22" fill="none" stroke="#3B82F6" stroke-width="10" stroke-linecap="round"
+                class="drop-shadow-sm" />
+            <path d="M28 18 A 40 40 0 0 1 50 10" fill="none" stroke="#10B981" stroke-width="10" stroke-linecap="round"
+                class="drop-shadow-sm" />
+            <path d="M54 10 A 40 40 0 0 1 75 22" fill="none" stroke="#F59E0B" stroke-width="10" stroke-linecap="round"
+                class="drop-shadow-sm" />
+            <path d="M78 25 A 40 40 0 0 1 90 50" fill="none" stroke="#8B5CF6" stroke-width="10" stroke-linecap="round"
+                class="drop-shadow-sm" />
+        </svg>
+    </div>
+
+    <!-- Central Text -->
+    <div class="text-center absolute bottom-0 left-0 right-0 transform translate-y-2">
+        <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">Total spend</p>
+        <h1 class="text-2xl font-extrabold text-gray-900">${{ total_expenses|floatformat:2 }}</h1>
+    </div>
+</div>
+
+<!-- Budget Limit Indicator (Mock) -->
+<div class="text-center mb-10">
+    <p class="text-xs text-gray-400 flex items-center justify-center">
+        <span class="w-2 h-2 rounded-full bg-gray-300 mr-2"></span>
+        Your monthly spending limit is $10,000
+    </p>
+</div>
+
+<!-- Categories List -->
+<div class="grid grid-cols-2 gap-x-8 gap-y-6 mb-10 px-4">
+    {% for item in category_data %}
+    <div class="flex items-start">
+        <div class="w-2 h-2 rounded-full mt-1.5 mr-3 flex-shrink-0 
+            {% cycle 'bg-blue-500' 'bg-green-500' 'bg-yellow-500' 'bg-purple-500' 'bg-pink-500' %}">
+        </div>
+        <div>
+            <h4 class="font-bold text-gray-900 text-sm">{{ item.category__name|default:"Uncategorized" }}</h4>
+            <p class="text-xs text-gray-400 mt-0.5">${{ item.total|floatformat:0 }}</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Today / Recent Transactions -->
+<div class="pb-20">
+    <h3 class="font-bold text-gray-900 text-base mb-4">Today</h3>
+
+    <div class="space-y-5">
+        {% for transaction in recent_transactions %}
+        <div class="flex items-center justify-between group">
+            <div class="flex items-center">
+                <!-- Icon Box -->
+                <div
+                    class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center mr-4 text-xl border border-gray-100 group-hover:bg-purple-50 group-hover:border-purple-100 transition">
+                    {% if transaction.payment_method.icon %}
+                    <img src="{{ transaction.payment_method.icon }}" class="w-6 h-6 object-contain">
+                    {% else %}
+                    <!-- Category/Default Icon Fallback -->
+                    {% if transaction.transaction_type == 'income' %}💰{% else %}🛒{% endif %}
+                    {% endif %}
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-900 text-sm mb-0.5">{{ transaction.title }}</h4>
+                    <div class="flex items-center text-xs text-gray-400">
+                        <span class="mr-2">Completed</span>
+                        <div class="w-1 h-1 bg-gray-300 rounded-full mr-2"></div>
+                        <span>{{ transaction.date|date:"H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="text-right">
+                <span
+                    class="block font-bold text-sm {% if transaction.transaction_type == 'income' %}text-green-500{% else %}text-red-500{% endif %}">
+                    {% if transaction.transaction_type == 'income' %}+{% else %}-{% endif %}${{ transaction.amount }}
+                </span>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-8">
+            <p class="text-gray-400 text-sm">No transactions today</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
