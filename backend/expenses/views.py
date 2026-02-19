@@ -14,6 +14,22 @@ def home(request):
         "admin": "/admin/"
     })
 
+def get_default_user():
+    from django.contrib.auth.models import User
+    user = User.objects.all().order_by('id').first()
+    if not user:
+        # Create a default admin user if none exists (for single-user mode)
+        user = User.objects.create_user(username='admin', email='admin@example.com', password='password123')
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+        
+        # Ensure profile exists
+        from .models import UserProfile
+        if not hasattr(user, 'profile'):
+            UserProfile.objects.get_or_create(user=user, defaults={'avatar_url': f'https://api.dicebear.com/7.x/avataaars/svg?seed={user.username}'})
+    return user
+
 from .forms import TransactionForm
 from django.shortcuts import redirect
 
@@ -24,8 +40,7 @@ def add_transaction(request):
             transaction = form.save(commit=False)
             # Default to admin user if not logged in (for now)
             if not request.user.is_authenticated:
-                from django.contrib.auth.models import User
-                transaction.user = User.objects.first()
+                transaction.user = get_default_user()
             else:
                 transaction.user = request.user
             transaction.save()
@@ -86,8 +101,7 @@ def sms_webhook(request):
                 return JsonResponse({'status': 'ignored', 'message': 'No transaction details found'}, status=200)
 
             # Find or Create User (Assuming single user for now or handled via token)
-            from django.contrib.auth.models import User
-            user = User.objects.first() # Default to admin
+            user = get_default_user()
             
             # Find or Create Category
             category, _ = Category.objects.get_or_create(
@@ -189,13 +203,13 @@ def reset_data(request):
 class MonthlyBudgetView(viewsets.ViewSet):
     def list(self, request):
         # Ensure user exists (dev mode fallback)
-        user = request.user if request.user.is_authenticated else User.objects.first()
+        user = request.user if request.user.is_authenticated else get_default_user()
         budget, created = MonthlyBudget.objects.get_or_create(user=user)
         serializer = MonthlyBudgetSerializer(budget)
         return Response(serializer.data)
 
     def create(self, request):
-        user = request.user if request.user.is_authenticated else User.objects.first()
+        user = request.user if request.user.is_authenticated else get_default_user()
         budget, created = MonthlyBudget.objects.get_or_create(user=user)
         
         amount = request.data.get('amount')
@@ -214,13 +228,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
         if self.request.user.is_authenticated:
             serializer.save(user=self.request.user)
         else:
-            from django.contrib.auth.models import User
-            # Ensure there is at least one user, otherwise this might fail if DB is empty
-            user = User.objects.first()
-            if not user:
-                 # Should ideally create a default user or raise error, but for now:
-                 raise ValueError("No users found in database. Please create a superuser.")
-            serializer.save(user=user)
+            serializer.save(user=get_default_user())
 
     @action(detail=False, methods=['get'])
     def dashboard_stats(self, request):
@@ -264,7 +272,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
             })
         
         # Calculate total budget from MonthlyBudget model
-        user = request.user if request.user.is_authenticated else User.objects.first()
+        user = request.user if request.user.is_authenticated else get_default_user()
         monthly_budget, _ = MonthlyBudget.objects.get_or_create(user=user)
         total_budget = monthly_budget.amount
 
@@ -418,15 +426,10 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
     serializer_class = SavingsGoalSerializer
 
     def perform_create(self, serializer):
-        # Fallback to first user if not authenticated (dev mode)
         if self.request.user.is_authenticated:
             serializer.save(user=self.request.user)
         else:
-            from django.contrib.auth.models import User
-            user = User.objects.first()
-            if not user:
-                 raise ValueError("No users found in database. Please create a superuser.")
-            serializer.save(user=user)
+            serializer.save(user=get_default_user())
 
     @action(detail=True, methods=['post'])
     def add_amount(self, request, pk=None):
@@ -455,8 +458,7 @@ def current_user(request):
     if request.user.is_authenticated:
         user = request.user
     else:
-        from django.contrib.auth.models import User
-        user = User.objects.first()
+        user = get_default_user()
     
     if not user:
         return Response({
@@ -484,8 +486,7 @@ def update_profile(request):
     if request.user.is_authenticated:
         user = request.user
     else:
-        from django.contrib.auth.models import User
-        user = User.objects.first()
+        user = get_default_user()
         
     if not user:
         return Response({'error': 'No user found'}, status=status.HTTP_404_NOT_FOUND)
