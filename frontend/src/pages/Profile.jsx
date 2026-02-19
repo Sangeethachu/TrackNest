@@ -3,6 +3,7 @@ import { User, Settings, CreditCard, Bell, LogOut, ChevronRight, HelpCircle } fr
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import MonthlyBudgetProgress from '../components/MonthlyBudgetProgress';
+import LoadingSpinner from '../components/LoadingSpinner';
 import { formatCurrency } from './Home';
 
 const Profile = () => {
@@ -40,6 +41,10 @@ const Profile = () => {
         { icon: Bell, label: 'Notifications', value: 'On', path: '/settings' },
         { icon: HelpCircle, label: 'Help & Support', value: '', path: '/help' },
     ];
+
+    if (loading) {
+        return <LoadingSpinner fullPage={true} />;
+    }
 
     const totalBudget = dashboardData?.total_budget || 10000;
 

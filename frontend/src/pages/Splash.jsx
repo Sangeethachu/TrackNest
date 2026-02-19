@@ -18,7 +18,7 @@ const Splash = () => {
                     <img
                         src="/app_loader_icon.png"
                         alt="TrackNest Logo"
-                        className="w-32 h-32 object-contain"
+                        className="w-48 h-48 object-contain"
                     />
                 </div>
                 <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">TrackNest.</h1>

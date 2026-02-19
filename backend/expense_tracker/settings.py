@@ -118,7 +118,7 @@ if _db_url:
 DATABASES = {
     'default': dj_database_url.parse(
         _db_url,
-        conn_max_age=600,
+        conn_max_age=0 if not DEBUG else 600,
         conn_health_checks=True,
     ) if _db_url else dj_database_url.config(
         default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')

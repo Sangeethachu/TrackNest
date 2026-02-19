@@ -3,7 +3,7 @@ import React from 'react';
 const LoadingSpinner = ({ fullPage = false }) => {
     const content = (
         <div className="flex flex-col items-center justify-center gap-4">
-            <div className="relative w-24 h-24">
+            <div className="relative w-32 h-32">
                 {/* Animated Rings */}
                 <div className="absolute inset-0 border-4 border-indigo-200 dark:border-indigo-900/30 rounded-full animate-pulse opacity-50"></div>
                 <div className="absolute inset-2 border-4 border-indigo-100 dark:border-indigo-800/20 rounded-full animate-ping opacity-20"></div>
@@ -13,7 +13,7 @@ const LoadingSpinner = ({ fullPage = false }) => {
                     <img
                         src="/app_loader_icon.png"
                         alt="Loading..."
-                        className="w-20 h-20 object-contain drop-shadow-2xl"
+                        className="w-28 h-28 object-contain drop-shadow-2xl"
                     />
                 </div>
             </div>
