@@ -43,6 +43,14 @@ def register_user(request):
     user = User.objects.create_user(username=username, email=email, password=password, first_name=first_name)
     UserProfile.objects.create(user=user, avatar_url=f'https://api.dicebear.com/7.x/avataaars/svg?seed={username}')
     
+    # Create Welcome Notification
+    Notification.objects.create(
+        user=user,
+        title='Welcome to TrackNest!',
+        message=f"Hi {first_name or username}, thanks for joining! Start by adding your first transaction or setting a budget.",
+        notification_type='success'
+    )
+
     refresh = RefreshToken.for_user(user)
     return Response({
         'status': 'success',
@@ -228,7 +236,49 @@ class TransactionViewSet(viewsets.ModelViewSet):
         return Transaction.objects.filter(user=self.request.user).order_by('-date')
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        transaction = serializer.save(user=self.request.user)
+        
+        # Budget Check Logic
+        if hasattr(self.request.user, 'monthlybudget'):
+            monthly_budget = self.request.user.monthlybudget.amount
+            if monthly_budget > 0 and transaction.transaction_type == 'expense':
+                user = self.request.user
+                current_month = timezone.now().month
+                current_year = timezone.now().year
+                
+                total_expenses = Transaction.objects.filter(
+                    user=user, 
+                    transaction_type='expense',
+                    date__month=current_month, 
+                    date__year=current_year
+                ).aggregate(Sum('amount'))['amount__sum'] or 0
+                
+                percentage = (total_expenses / monthly_budget) * 100
+                
+                if percentage >= 100:
+                    if not Notification.objects.filter(
+                        user=user, 
+                        title='Budget Exceeded!', 
+                        created_at__date=timezone.now().date()
+                    ).exists():
+                         Notification.objects.create(
+                            user=user,
+                            title='Budget Exceeded!',
+                            message=f"You've exceeded your monthly budget of {monthly_budget}!",
+                            notification_type='error'
+                        )
+                elif percentage >= 80:
+                    if not Notification.objects.filter(
+                        user=user, 
+                        title='Budget Alert', 
+                        created_at__date=timezone.now().date()
+                    ).exists():
+                        Notification.objects.create(
+                            user=user,
+                            title='Budget Alert',
+                            message=f"Heads up! You've used {int(percentage)}% of your monthly budget.",
+                            notification_type='warning'
+                        )
 
     @action(detail=False, methods=['get'])
     def dashboard_stats(self, request):
@@ -444,8 +494,18 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
         except (ValueError, TypeError, InvalidOperation):
             return Response({'error': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
         
+        old_amount = goal.saved_amount
         goal.saved_amount += amount
         goal.save()
+        
+        # Check if goal reached
+        if old_amount < goal.target_amount and goal.saved_amount >= goal.target_amount:
+             Notification.objects.create(
+                user=request.user,
+                title='Goal Reached! 🎉',
+                message=f"Congratulations! You've reached your savings goal for '{goal.name}'!",
+                notification_type='success'
+            )
         
         serializer = self.get_serializer(goal)
         return Response(serializer.data)
