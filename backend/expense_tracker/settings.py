@@ -95,8 +95,17 @@ WSGI_APPLICATION = 'expense_tracker.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+_db_url = os.environ.get('DATABASE_URL', '')
+if _db_url:
+    # Remove accidental brackets, quotes, or trailing/leading whitespace
+    _db_url = _db_url.replace('[', '').replace(']', '').replace('"', '').replace("'", "").strip()
+
 DATABASES = {
-    'default': dj_database_url.config(
+    'default': dj_database_url.parse(
+        _db_url,
+        conn_max_age=600,
+        conn_health_checks=True,
+    ) if _db_url else dj_database_url.config(
         default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
     )
 }
