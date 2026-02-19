@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import MonthlyBudgetProgress from '../components/MonthlyBudgetProgress';
+import LoadingSpinner from '../components/LoadingSpinner';
 import { useNavigate } from 'react-router-dom';
 import { Bell, MoreHorizontal, TrendingUp, Download, Upload, Plus, Wallet, TrendingDown, ArrowUpRight, ArrowDownLeft, DollarSign, Calendar, CreditCard, RotateCcw, Pencil, Trash2, Check, Target } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
@@ -211,6 +212,10 @@ const Home = () => {
 
   const monthChange = dashboardData?.month_change || 0;
   const isBalancePositive = monthChange >= 0;
+
+  if (loading && !dashboardData) {
+    return <LoadingSpinner fullPage={true} />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24 dark:bg-gray-900 transition-colors duration-300">

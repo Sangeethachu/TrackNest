@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LoadingSpinner from '../components/LoadingSpinner';
 import {
     ChevronLeft,
     TrendingUp,
@@ -78,11 +79,7 @@ const Stats = () => {
     };
 
     if (loading) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <p className="text-gray-500 animate-pulse">Loading analytics...</p>
-            </div>
-        );
+        return <LoadingSpinner fullPage={true} />;
     }
 
     const { category_distribution, monthly_trend, summary } = data;

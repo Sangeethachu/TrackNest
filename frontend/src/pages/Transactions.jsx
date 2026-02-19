@@ -3,6 +3,7 @@ import { Search, ShoppingBag, TrendingDown, ArrowLeft } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const Transactions = () => {
   const navigate = useNavigate();
@@ -189,7 +190,9 @@ const Transactions = () => {
         <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-4">Recent activity</h2>
         <div className="bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-800">
           {loading ? (
-            <p className="p-8 text-center text-gray-500">Loading your history...</p>
+            <div className="py-12">
+              <LoadingSpinner />
+            </div>
           ) : transactions.length === 0 ? (
             <p className="p-8 text-center text-gray-500">No transactions recorded yet.</p>
           ) : transactions.map((transaction, index) => (
