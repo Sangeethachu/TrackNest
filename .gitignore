@@ -1,0 +1,27 @@
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Dependencies
+node_modules/
+.npm/
+
+# IDEs
+.vscode/
+.idea/
+
+# Backend
+db.sqlite3
+__pycache__/
+*.pyc
+.env
+media/
+staticfiles/
+
+# Logs
+*.log
+
+# Misc
+.DS_Store
+.gemini/
