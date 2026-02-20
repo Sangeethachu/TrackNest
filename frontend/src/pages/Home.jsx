@@ -68,11 +68,20 @@ const Home = () => {
     fetchUnreadNotifications();
   }, []);
 
+  const [hasNewNotifications, setHasNewNotifications] = useState(false);
+
   const fetchUnreadNotifications = async () => {
     try {
       const response = await api.get('/notifications/');
-      const unread = response.data.filter(n => !n.is_read).length;
-      setUnreadCount(unread);
+      const unreadList = response.data.filter(n => !n.is_read);
+
+      const lastSeenIdStr = localStorage.getItem('lastSeenNotificationId');
+      const lastSeenId = lastSeenIdStr ? parseInt(lastSeenIdStr, 10) : 0;
+
+      const hasNew = unreadList.some(n => n.id > lastSeenId);
+
+      setUnreadCount(unreadList.length);
+      setHasNewNotifications(hasNew);
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
     }
@@ -254,14 +263,14 @@ const Home = () => {
             </div>
             <button
               onClick={() => navigate('/notifications')}
-              className={`p-2 bg-white/50 dark:bg-gray-800/50 rounded-full shadow-sm hover:shadow-md transition-all border border-white/50 dark:border-gray-700 hover-ring backdrop-blur-sm relative ${unreadCount > 0 ? 'animate-bounce' : ''}`}
+              className={`p-2 bg-white/50 dark:bg-gray-800/50 rounded-full shadow-sm hover:shadow-md transition-all border border-white/50 dark:border-gray-700 hover-ring backdrop-blur-sm relative`}
             >
-              <Bell size={24} className={`text-gray-700 dark:text-gray-200 ${unreadCount > 0 ? 'text-indigo-600 dark:text-indigo-400' : ''}`} />
+              <Bell size={24} className={`text-gray-700 dark:text-gray-200 ${(hasNewNotifications || unreadCount > 0) ? 'text-indigo-600 dark:text-indigo-400' : ''} ${hasNewNotifications ? '[animation:ring_1s_ease-in-out_infinite]' : ''}`} />
+              {hasNewNotifications && (
+                <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
+              )}
               {unreadCount > 0 && (
-                <>
-                  <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
-                  <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
-                </>
+                <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
               )}
             </button>
           </div>

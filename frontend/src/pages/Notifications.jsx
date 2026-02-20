@@ -17,6 +17,12 @@ const Notifications = () => {
         try {
             const response = await api.get('/notifications/');
             setNotifications(response.data);
+
+            // Mark the newest notification as seen so the Home page bell stops ringing
+            if (response.data.length > 0) {
+                const maxId = Math.max(...response.data.map(n => n.id));
+                localStorage.setItem('lastSeenNotificationId', maxId.toString());
+            }
         } catch (err) {
             console.error('Failed to fetch notifications:', err);
         } finally {
