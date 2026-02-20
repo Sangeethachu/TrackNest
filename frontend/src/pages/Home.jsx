@@ -59,6 +59,11 @@ const Home = () => {
   ];
 
   const [unreadCount, setUnreadCount] = useState(0);
+  const [hasNewNotifications, setHasNewNotifications] = useState(false);
+
+  // Smart Text State
+  const [smartText, setSmartText] = useState('');
+  const [isSubmittingSmartText, setIsSubmittingSmartText] = useState(false);
 
   useEffect(() => {
     fetchUserData();
@@ -68,7 +73,23 @@ const Home = () => {
     fetchUnreadNotifications();
   }, []);
 
-  const [hasNewNotifications, setHasNewNotifications] = useState(false);
+  const handleSmartTextSubmit = async (e) => {
+    e.preventDefault();
+    if (!smartText.trim()) return;
+
+    setIsSubmittingSmartText(true);
+    try {
+      const response = await api.post('/parse-smart-text/', { text: smartText });
+      alert(response.data.message);
+      setSmartText('');
+      fetchDashboardData(); // Refresh values
+    } catch (err) {
+      console.error('Smart text error:', err);
+      alert(err.response?.data?.error || 'Could not parse that sentence. Try "Spent 500 on groceries"');
+    } finally {
+      setIsSubmittingSmartText(false);
+    }
+  };
 
   const fetchUnreadNotifications = async () => {
     try {
@@ -350,6 +371,36 @@ const Home = () => {
             )
           })}
         </div>
+      </div>
+
+      {/* AI Smart Input */}
+      <div className="px-6 mt-8">
+        <form onSubmit={handleSmartTextSubmit} className="relative group">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <LucideIcons.Sparkles className="h-5 w-5 text-indigo-500 group-focus-within:animate-pulse" />
+          </div>
+          <input
+            type="text"
+            className="block w-full pl-11 pr-12 py-4 bg-white dark:bg-gray-800 border-0 rounded-2xl text-sm shadow-sm hover:shadow-md focus:ring-2 focus:ring-indigo-500 dark:text-white transition-shadow"
+            placeholder="Type 'spent 500 on groceries today'..."
+            value={smartText}
+            onChange={(e) => setSmartText(e.target.value)}
+            disabled={isSubmittingSmartText}
+          />
+          <div className="absolute inset-y-0 right-2 flex items-center">
+            <button
+              type="submit"
+              disabled={isSubmittingSmartText || !smartText.trim()}
+              className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl disabled:opacity-50 transition-colors"
+            >
+              {isSubmittingSmartText ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <LucideIcons.Send className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Savings Goals */}

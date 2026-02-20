@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/forgot-password/', views.forgot_password, name='forgot_password'),
     path('api/change-pin/', views.change_pin, name='change_pin'),
     path('api/upload-statement/', views.upload_statement, name='upload_statement'),
+    path('api/parse-smart-text/', views.parse_smart_text, name='parse_smart_text'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/webhook/sms/', views.sms_webhook, name='sms_webhook'),

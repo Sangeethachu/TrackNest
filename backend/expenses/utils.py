@@ -172,3 +172,71 @@ def parse_federal_bank_statement(pdf_file, user, password=''):
                     continue
 
     return parsed_transactions
+
+def parse_natural_language_expense(text, user):
+    """
+    Parses a natural language string to extract amount, title, and date.
+    Uses regex + heuristics for basic NLP without requiring an API key.
+    Examples: 
+      - "Spent 500 on groceries yesterday"
+      - "Coffee 150"
+      - "swiggy dinner rs 500"
+    """
+    import datetime
+    from decimal import Decimal
+    import re
+    
+    text = text.lower().strip()
+    result = {
+        'amount': Decimal('0.00'),
+        'title': 'Quick Expense',
+        'date': datetime.datetime.now().date(),
+        'transaction_type': 'expense',
+        'category_name': 'General'
+    }
+    
+    # Extract Amount
+    # Matches: 500, 500.50, rs 500, ₹500
+    amount_match = re.search(r'(?:rs\.?|inr|₹|rs)?\s?(\d+([.,]\d{1,2})?)\s?(?:rs\.?|inr|₹|rupees)?', text)
+    if amount_match:
+        try:
+            result['amount'] = Decimal(amount_match.group(1).replace(',', ''))
+            # Remove the amount from text so we can use the rest for title
+            text = text.replace(amount_match.group(0), '').strip()
+        except:
+            pass
+            
+    # Extract Date
+    today = datetime.datetime.now().date()
+    if 'yesterday' in text:
+        result['date'] = today - datetime.timedelta(days=1)
+        text = text.replace('yesterday', '').strip()
+    elif 'day before yesterday' in text:
+        result['date'] = today - datetime.timedelta(days=2)
+        text = text.replace('day before yesterday', '').strip()
+    elif 'today' in text:
+        text = text.replace('today', '').strip()
+        
+    # Clean up stop words from the remaining text to get the title
+    stop_words = ['spent', 'paid', 'gave', 'on', 'for', 'to', 'rupees', 'rs']
+    words = text.split()
+    title_words = [w for w in words if w not in stop_words]
+    
+    if title_words:
+        raw_title = " ".join(title_words)
+        result['title'] = raw_title.title()
+        
+        # Categorize
+        if any(kw in raw_title for kw in ['zomato', 'swiggy', 'dinner', 'lunch', 'eat', 'food', 'restaurant', 'cafe', 'mcdonald', 'kfc', 'domino', 'coffee']):
+            result['category_name'] = 'Food'
+        elif any(kw in raw_title for kw in ['amazon', 'flipkart', 'myntra', 'shop', 'mart', 'supermarket', 'mall', 'store', 'reliance', 'grocery', 'groceries']):
+            result['category_name'] = 'Shopping'
+        elif any(kw in raw_title for kw in ['uber', 'ola', 'rapido', 'irctc', 'ticket', 'flight', 'petrol', 'fuel', 'hpcl', 'bpcl', 'ioc', 'cab', 'auto']):
+            result['category_name'] = 'Travel'
+        elif any(kw in raw_title for kw in ['netflix', 'spotify', 'movie', 'cinema']):
+            result['category_name'] = 'Entertainment'
+        elif 'salary' in raw_title:
+            result['category_name'] = 'Income'
+            result['transaction_type'] = 'income'
+            
+    return result

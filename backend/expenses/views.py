@@ -340,6 +340,48 @@ def upload_statement(request):
         print("Upload statement error: ", str(e)) # Logs to stdout instead of returning traceback to user
         return Response({"error": "Failed to safely parse document. Ensure the file is uncorrupted and format matches."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+from .utils import parse_natural_language_expense
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def parse_smart_text(request):
+    """
+    Takes a natural language string and attempts to create an expense.
+    """
+    text = request.data.get('text', '')
+    if not text:
+        return Response({'error': 'Please provide text to parse'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    try:
+        data = parse_natural_language_expense(text, request.user)
+        
+        if data['amount'] <= 0:
+            return Response({'error': 'Could not detect a valid amount. Ensure you include a number.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Get or create category
+        category_obj, _ = Category.objects.get_or_create(name=data['category_name'], defaults={'icon': 'List', 'budget_limit': 0})
+        default_method, _ = PaymentMethod.objects.get_or_create(name='Cash', defaults={'icon': 'Wallet'})
+        
+        txn = Transaction.objects.create(
+            user=request.user,
+            title=data['title'],
+            amount=data['amount'],
+            date=data['date'],
+            transaction_type=data['transaction_type'],
+            category=category_obj,
+            payment_method=default_method
+        )
+        
+        return Response({
+            'status': 'success',
+            'message': f"Added ₹{data['amount']} for {data['title']}",
+            'transaction_id': txn.id
+        })
+        
+    except Exception as e:
+        print("Smart text parsing error:", str(e))
+        return Response({'error': 'Failed to understand that sentence.'}, status=status.HTTP_400_BAD_REQUEST)
+
 class MonthlyBudgetView(viewsets.ViewSet):
     def list(self, request):
         budget, created = MonthlyBudget.objects.get_or_create(user=request.user)
