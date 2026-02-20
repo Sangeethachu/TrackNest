@@ -280,9 +280,18 @@ def upload_statement(request):
     magic_bytes = uploaded_file.read(4)
     if magic_bytes != b'%PDF':
         return Response({"error": "File signature invalid. This is not a genuine authentic PDF."}, status=status.HTTP_400_BAD_REQUEST)
+        
+    # 3.5. Anti-Polyglot Safety Check (Ensure file genuinely ends like a PDF should)
+    uploaded_file.seek(0, 2) # Go to the very end of the file
+    file_size = uploaded_file.tell()
+    uploaded_file.seek(max(0, file_size - 1024)) # Read the last 1024 bytes
+    end_bytes = uploaded_file.read()
+    if b'%%EOF' not in end_bytes:
+        return Response({"error": "Failed deep security check: Missing valid EOF marker. Possible polyglot file."}, status=status.HTTP_400_BAD_REQUEST)
+        
     uploaded_file.seek(0) # Reset file pointer back to start
 
-    # Basic filename validation fallback
+    # 4. Basic filename validation fallback
     if not uploaded_file.name.lower().endswith('.pdf'):
         return Response({"error": "Only PDF files are supported for parsing"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -300,12 +309,16 @@ def upload_statement(request):
         created_count = 0
         skipped_count = 0
         
+        import re
+        
         # Save them into the database securely
         for tx_data in parsed_transactions:
-            # 4. Sanitize Strings (Prevent XSS/Injection on title)
+            # 5. Ultimate Sanitize Strings (Prevent XSS/Injection on title using strict ASCII matching)
+            # Remove all non-printable ASCII characters or hidden control codes
             clean_title = strip_tags(tx_data['title'])[:255]
+            clean_title = re.sub(r'[^\x20-\x7E]', '', clean_title).strip()
             
-            # 5. De-Duplication Logic (Prevent accidental double uploads of the same statement)
+            # 6. De-Duplication Logic (Prevent accidental double uploads of the same statement)
             exists = Transaction.objects.filter(
                 user=request.user, 
                 title=clean_title, 
@@ -314,7 +327,7 @@ def upload_statement(request):
             ).exists()
             
             if not exists:
-                # 6. Smart auto-mapping for transaction category
+                # 7. Smart auto-mapping for transaction category
                 cat_name = tx_data.get('category_name', 'General')
                 category_obj, _ = Category.objects.get_or_create(name=cat_name, defaults={'icon': 'List', 'budget_limit': 0})
                 
