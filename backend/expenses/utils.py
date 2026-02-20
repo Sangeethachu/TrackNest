@@ -140,13 +140,32 @@ def parse_federal_bank_statement(pdf_file, user, password=''):
                         amount = Decimal(deposit_str)
                         txn_type = 'income'
                         
+                    # Basic Smart Categorization Logic
+                    assigned_category = 'General'
+                    narration_lower = narration.lower()
+                    
+                    if any(kw in narration_lower for kw in ['zomato', 'swiggy', 'eat', 'food', 'restaurant', 'cafe', 'mcdonald', 'kfc', 'domino']):
+                        assigned_category = 'Food'
+                    elif any(kw in narration_lower for kw in ['amazon', 'flipkart', 'myntra', 'shop', 'mart', 'supermarket', 'mall', 'store', 'reliance']):
+                        assigned_category = 'Shopping'
+                    elif any(kw in narration_lower for kw in ['uber', 'ola', 'rapido', 'irctc', 'ticket', 'flight', 'petrol', 'fuel', 'hpcl', 'bpcl', 'ioc']):
+                        assigned_category = 'Travel'
+                    elif any(kw in narration_lower for kw in ['netflix', 'spotify', 'prime', 'hotstar', 'movie', 'cinema', 'pvr']):
+                        assigned_category = 'Entertainment'
+                    elif any(kw in narration_lower for kw in ['hospital', 'pharmacy', 'clinic', 'medical', 'doctor', 'apollo', 'medplus']):
+                        assigned_category = 'Health'
+                    elif any(kw in narration_lower for kw in ['salary', 'neft', 'imps', 'tfr', 'credited']):
+                        assigned_category = 'Income' if txn_type == 'income' else 'General'
+                    elif any(kw in narration_lower for kw in ['bill', 'recharge', 'airtel', 'jio', 'vi', 'electricity', 'water', 'bescom']):
+                        assigned_category = 'Bills'
+                        
                     if txn_type and amount > 0:
                         parsed_transactions.append({
                             'title': narration[:255], # Truncate title
                             'amount': amount,
                             'date': txn_date,
                             'transaction_type': txn_type,
-                            'category_name': 'General' # Default category
+                            'category_name': assigned_category
                         })
                 except Exception as e:
                     print(f"Failed to parse row: {row}. Error: {e}")

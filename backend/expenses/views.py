@@ -314,13 +314,17 @@ def upload_statement(request):
             ).exists()
             
             if not exists:
+                # 6. Smart auto-mapping for transaction category
+                cat_name = tx_data.get('category_name', 'General')
+                category_obj, _ = Category.objects.get_or_create(name=cat_name, defaults={'icon': 'List', 'budget_limit': 0})
+                
                 Transaction.objects.create(
                     user=request.user,
                     title=clean_title,
                     amount=tx_data['amount'],
                     date=tx_data['date'],
                     transaction_type=tx_data['transaction_type'],
-                    category=default_cat,
+                    category=category_obj,
                     payment_method=default_method
                 )
                 created_count += 1
