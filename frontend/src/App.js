@@ -17,6 +17,8 @@ import Splash from './pages/Splash';
 import AddTransaction from './pages/AddTransaction';
 import AddSavingsGoal from './pages/AddSavingsGoal';
 import Notifications from './pages/Notifications';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import AppPermissions from './pages/AppPermissions';
 import BottomNav from './components/BottomNav';
 import api from './api';
 
@@ -96,6 +98,8 @@ function App() {
               <Route path="/add-payment-method" element={<AddPaymentMethod />} />
               <Route path="/edit-payment-method/:id" element={<AddPaymentMethod />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/permissions" element={<AppPermissions />} />
               <Route path="/help" element={<HelpSupport />} />
             </Route>
           </Route>

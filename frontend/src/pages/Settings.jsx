@@ -19,6 +19,19 @@ const Settings = () => {
     const { isDarkMode, toggleTheme } = useTheme();
     const [isResetOpen, setIsResetOpen] = useState(false);
 
+    // Initialize push notifications from localStorage or default to true
+    const [pushEnabled, setPushEnabled] = useState(() => {
+        const stored = localStorage.getItem('pushNotificationsEnabled');
+        return stored !== null ? stored === 'true' : true;
+    });
+
+    const togglePushNotifications = () => {
+        const newValue = !pushEnabled;
+        setPushEnabled(newValue);
+        localStorage.setItem('pushNotificationsEnabled', newValue);
+        // Optionally theoretically interface with service worker here if PWA
+    };
+
     const handleReset = async () => {
         try {
             await api.post('/reset-data/');
@@ -42,7 +55,7 @@ const Settings = () => {
                     value: isDarkMode,
                     action: toggleTheme
                 },
-                { icon: Bell, label: 'Push Notifications', type: 'toggle', value: true, action: () => { } },
+                { icon: Bell, label: 'Push Notifications', type: 'toggle', value: pushEnabled, action: togglePushNotifications },
             ]
         },
         {
@@ -80,9 +93,10 @@ const Settings = () => {
                                 return (
                                     <div
                                         key={itemIndex}
-                                        className={`flex items-center justify-between p-4 ${!isLastItem ? 'border-b border-gray-100 dark:border-gray-700' : ''}`}
+                                        onClick={() => item.type === 'link' && item.action && item.action()}
+                                        className={`flex items-center justify-between p-4 ${!isLastItem ? 'border-b border-gray-100 dark:border-gray-700' : ''} ${item.type === 'link' ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors' : ''}`}
                                     >
-                                        <div className="flex items-center space-x-4">
+                                        <div className="flex items-center space-x-4 pointer-events-none">
                                             <div className={`p-2 rounded-xl ${item.danger ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
                                                 {item.icon && <item.icon size={20} />}
                                             </div>
