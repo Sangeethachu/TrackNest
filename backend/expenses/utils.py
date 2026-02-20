@@ -218,7 +218,7 @@ def parse_natural_language_expense(text, user):
         text = text.replace('today', '').strip()
         
     # Clean up stop words from the remaining text to get the title
-    stop_words = ['spent', 'paid', 'gave', 'on', 'for', 'to', 'rupees', 'rs']
+    stop_words = ['spent', 'paid', 'gave', 'on', 'for', 'to', 'rupees', 'rs', 'i', 'had', 'got', 'in', 'at', 'the', 'evening', 'morning', 'afternoon', 'night']
     words = text.split()
     title_words = [w for w in words if w not in stop_words]
     
@@ -227,7 +227,7 @@ def parse_natural_language_expense(text, user):
         result['title'] = raw_title.title()
         
         # Categorize
-        if any(kw in raw_title for kw in ['zomato', 'swiggy', 'dinner', 'lunch', 'eat', 'food', 'restaurant', 'cafe', 'mcdonald', 'kfc', 'domino', 'coffee']):
+        if any(kw in raw_title for kw in ['zomato', 'swiggy', 'dinner', 'lunch', 'eat', 'food', 'restaurant', 'cafe', 'mcdonald', 'kfc', 'domino', 'coffee', 'tea', 'snacks', 'drink']):
             result['category_name'] = 'Food'
         elif any(kw in raw_title for kw in ['amazon', 'flipkart', 'myntra', 'shop', 'mart', 'supermarket', 'mall', 'store', 'reliance', 'grocery', 'groceries']):
             result['category_name'] = 'Shopping'
