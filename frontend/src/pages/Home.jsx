@@ -316,7 +316,7 @@ const Home = () => {
       <div className="px-6 mt-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-gray-900 dark:text-white">Quick Add</h2>
-          <button className="text-sm text-gray-500 hover:text-gray-700">See more</button>
+          <button onClick={() => navigate('/add-transaction')} className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">See more</button>
         </div>
         <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((cat) => {
