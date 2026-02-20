@@ -1,5 +1,6 @@
-import React from 'react';
-import { AlertTriangle, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { AlertTriangle, AlertCircle, Pencil, Check, X } from 'lucide-react';
+import api from '../api';
 
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
@@ -8,16 +9,67 @@ const formatCurrency = (amount) => {
     }).format(amount);
 };
 
-const MonthlyBudgetProgress = ({ expense = 0, totalBudget = 10000, loading = false }) => {
+const MonthlyBudgetProgress = ({ expense = 0, totalBudget = 10000, loading = false, onBudgetUpdate }) => {
     const percentUsed = (expense / totalBudget) * 100;
+    const [isEditing, setIsEditing] = useState(false);
+    const [newBudget, setNewBudget] = useState(totalBudget.toString());
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSaveBudget = async () => {
+        const parsedBudget = parseFloat(newBudget);
+        if (isNaN(parsedBudget) || parsedBudget <= 0) {
+            alert('Please enter a valid budget amount');
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            await api.post('/monthly-budget/', { amount: parsedBudget });
+            setIsEditing(false);
+            if (onBudgetUpdate) onBudgetUpdate();
+        } catch (error) {
+            console.error('Failed to save budget:', error);
+            alert('Failed to update budget limit');
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     return (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-800 dark:bg-gray-800">
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-800 dark:bg-gray-800 transition-all hover:shadow-md">
             <div className="flex items-center justify-between mb-3">
-                <h2 className="font-semibold text-gray-900 dark:text-white">Monthly spending</h2>
-                <span className={`text-sm ${percentUsed > 100 ? 'text-red-600 font-bold' : percentUsed >= 60 ? 'text-orange-500 font-bold' : percentUsed >= 50 ? 'text-yellow-600 font-bold' : 'text-gray-500 dark:text-gray-400'}`}>
-                    {loading ? '...' : formatCurrency(expense)} / {formatCurrency(totalBudget)}
-                </span>
+                <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    Monthly spending Limit
+                </h2>
+
+                {isEditing ? (
+                    <div className="flex items-center gap-2">
+                        ₹
+                        <input
+                            type="number"
+                            value={newBudget}
+                            onChange={(e) => setNewBudget(e.target.value)}
+                            className="w-24 px-2 py-1 text-sm border bg-gray-50 dark:bg-gray-700 dark:text-white border-gray-200 dark:border-gray-600 rounded outline-none focus:ring-2 focus:ring-indigo-500"
+                            autoFocus
+                            onKeyDown={(e) => e.key === 'Enter' && handleSaveBudget()}
+                        />
+                        <button onClick={handleSaveBudget} disabled={isSaving} className="text-green-600 hover:text-green-700 p-1 bg-green-50 dark:bg-green-900/30 rounded">
+                            <Check size={16} />
+                        </button>
+                        <button onClick={() => setIsEditing(false)} className="text-red-500 hover:text-red-600 p-1 bg-red-50 dark:bg-red-900/30 rounded">
+                            <X size={16} />
+                        </button>
+                    </div>
+                ) : (
+                    <div className="flex items-center group cursor-pointer" onClick={() => { setIsEditing(true); setNewBudget(totalBudget.toString()); }}>
+                        <span className={`text-sm tracking-tight ${percentUsed > 100 ? 'text-red-600 font-bold' : percentUsed >= 60 ? 'text-orange-500 font-bold' : percentUsed >= 50 ? 'text-yellow-600 font-bold' : 'text-gray-600 dark:text-gray-300'}`}>
+                            {loading ? '...' : formatCurrency(expense)} <span className="text-gray-400 font-normal">/ {formatCurrency(totalBudget)}</span>
+                        </span>
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 p-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <Pencil size={12} className="text-gray-600 dark:text-gray-300" />
+                        </div>
+                    </div>
+                )}
             </div>
 
             {percentUsed > 100 ? (

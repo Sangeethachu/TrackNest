@@ -531,6 +531,7 @@ const Home = () => {
           expense={dashboardData?.expense}
           totalBudget={totalBudget}
           loading={loading}
+          onBudgetUpdate={fetchDashboardData}
         />
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 mt-4 shadow-sm border border-gray-100 dark:border-gray-800">
