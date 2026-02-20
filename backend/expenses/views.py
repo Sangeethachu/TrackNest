@@ -349,12 +349,21 @@ def parse_smart_text(request):
     Takes a natural language string and attempts to create an expense.
     """
     text = request.data.get('text', '')
+    is_preview = request.data.get('preview', False)
+    
     if not text:
         return Response({'error': 'Please provide text to parse'}, status=status.HTTP_400_BAD_REQUEST)
         
     try:
         data = parse_natural_language_expense(text, request.user)
         
+        # In preview mode, just return the AI's parsed object without saving
+        if is_preview:
+            return Response({
+                'status': 'success',
+                'preview': data
+            })
+            
         if data['amount'] <= 0:
             return Response({'error': 'Could not detect a valid amount. Ensure you include a number.'}, status=status.HTTP_400_BAD_REQUEST)
             

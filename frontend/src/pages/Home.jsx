@@ -63,6 +63,7 @@ const Home = () => {
 
   // Smart Text State
   const [smartText, setSmartText] = useState('');
+  const [smartTextPreview, setSmartTextPreview] = useState(null);
   const [isSubmittingSmartText, setIsSubmittingSmartText] = useState(false);
 
   useEffect(() => {
@@ -73,6 +74,21 @@ const Home = () => {
     fetchUnreadNotifications();
   }, []);
 
+  // Poll for UI Preview auto-suggestions
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (smartText.trim().length > 2) {
+        api.post('/parse-smart-text/', { text: smartText, preview: true })
+          .then(res => setSmartTextPreview(res.data.preview))
+          .catch(() => setSmartTextPreview(null));
+      } else {
+        setSmartTextPreview(null);
+      }
+    }, 400);
+
+    return () => clearTimeout(handler);
+  }, [smartText]);
+
   const handleSmartTextSubmit = async (e) => {
     e.preventDefault();
     if (!smartText.trim()) return;
@@ -82,6 +98,7 @@ const Home = () => {
       const response = await api.post('/parse-smart-text/', { text: smartText });
       alert(response.data.message);
       setSmartText('');
+      setSmartTextPreview(null);
       fetchDashboardData(); // Refresh values
     } catch (err) {
       console.error('Smart text error:', err);
@@ -401,6 +418,28 @@ const Home = () => {
             </button>
           </div>
         </form>
+
+        {/* Magic Auto-Suggestion Preview */}
+        {smartTextPreview && smartText.trim().length > 2 && (
+          <div className="mt-3 p-4 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 rounded-2xl flex items-center justify-between animate-fade-in shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-300 rounded-xl">
+                <LucideIcons.Wand2 size={18} />
+              </div>
+              <div>
+                <p className="text-xs text-indigo-500 dark:text-indigo-400 font-semibold mb-0.5 uppercase tracking-wider">AI Prediction</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                  {smartTextPreview.transaction_type === 'income' ? '+' : '-'}₹{smartTextPreview.amount} for <span className="font-bold">{smartTextPreview.title || 'Unknown'}</span>
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-1">
+                  <LucideIcons.Folder size={12} /> {smartTextPreview.category_name}
+                  <span className="mx-1">•</span>
+                  <LucideIcons.Calendar size={12} /> {new Date(smartTextPreview.date).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Savings Goals */}
