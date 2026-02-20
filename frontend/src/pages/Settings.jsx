@@ -61,6 +61,7 @@ const Settings = () => {
         {
             title: 'Security',
             items: [
+                { icon: Shield, label: 'Change PIN / Password', type: 'link', action: () => navigate('/change-pin') },
                 { icon: Shield, label: 'Privacy Policy', type: 'link', action: () => navigate('/privacy') },
                 { icon: Smartphone, label: 'App Permissions', type: 'link', action: () => navigate('/permissions') },
             ]

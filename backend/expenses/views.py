@@ -59,6 +59,40 @@ def register_user(request):
         'user': UserSerializer(user).data
     }, status=status.HTTP_201_CREATED)
 
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def forgot_password(request):
+    email = request.data.get('email')
+    new_password = request.data.get('new_password')
+    
+    if not email or not new_password:
+        return Response({'error': 'Please provide email and new password'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    user = User.objects.filter(email=email).first()
+    if not user:
+        return Response({'error': 'No account found with this email'}, status=status.HTTP_404_NOT_FOUND)
+        
+    user.set_password(new_password)
+    user.save()
+    
+    return Response({'message': 'Password updated successfully'}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def change_pin(request):
+    current_password = request.data.get('current_password')
+    new_password = request.data.get('new_password')
+    
+    if not current_password or not new_password:
+        return Response({'error': 'Please provide current and new password'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    if not request.user.check_password(current_password):
+        return Response({'error': 'Incorrect current password'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    request.user.set_password(new_password)
+    request.user.save()
+    
+    return Response({'message': 'Password changed successfully'}, status=status.HTTP_200_OK)
+
 # Removed add_transaction and get_default_user for security. Use API.
 
 from django.db.models import Sum

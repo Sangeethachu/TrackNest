@@ -19,6 +19,8 @@ import AddSavingsGoal from './pages/AddSavingsGoal';
 import Notifications from './pages/Notifications';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import AppPermissions from './pages/AppPermissions';
+import ForgotPassword from './pages/ForgotPassword';
+import ChangePin from './pages/ChangePin';
 import BottomNav from './components/BottomNav';
 import api from './api';
 
@@ -80,6 +82,7 @@ function App() {
             <Route path="/splash" element={<Splash />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
           </Route>
 
           {/* Private Routes (With Bottom Nav) */}
@@ -94,6 +97,7 @@ function App() {
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/edit-profile" element={<EditProfile />} />
+              <Route path="/change-pin" element={<ChangePin />} />
               <Route path="/payment-methods" element={<PaymentMethods />} />
               <Route path="/add-payment-method" element={<AddPaymentMethod />} />
               <Route path="/edit-payment-method/:id" element={<AddPaymentMethod />} />

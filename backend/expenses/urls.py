@@ -21,6 +21,8 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     path('', views.home, name='home'),
     path('api/register/', views.register_user, name='register'),
+    path('api/forgot-password/', views.forgot_password, name='forgot_password'),
+    path('api/change-pin/', views.change_pin, name='change_pin'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/webhook/sms/', views.sms_webhook, name='sms_webhook'),
