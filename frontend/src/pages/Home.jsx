@@ -607,7 +607,7 @@ const Home = () => {
                   {transaction.transaction_type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
                 </p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                  {new Date(transaction.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {new Date(transaction.date).toLocaleDateString()}
                 </p>
               </div>
             </div>
