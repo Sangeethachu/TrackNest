@@ -250,12 +250,16 @@ def reset_data(request):
         return Response({'status': 'error', 'message': str(e)}, status=500)
 
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.decorators import permission_classes
+from rest_framework import permissions
+from django.utils.html import escape, strip_tags
 from .utils import parse_federal_bank_statement
 
 @api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
 def upload_statement(request):
     """
-    Endpoint strictly for uploading PDF bank statements.
+    Endpoint strictly for uploading PDF bank statements securely.
     Processes the file purely in-memory, discarding it immediately after.
     Currently specifically customized for Federal Bank statement formatting.
     """
@@ -264,8 +268,22 @@ def upload_statement(request):
         
     uploaded_file = request.FILES['file']
     
-    # Very basic validation
-    if not uploaded_file.name.endswith('.pdf'):
+    # 1. Strict File Size Limit (max 5MB) to prevent DoS attacks
+    if uploaded_file.size > 5 * 1024 * 1024:
+        return Response({"error": "File too large. Maximum size is 5MB."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # 2. Content Type Validation
+    if uploaded_file.content_type != 'application/pdf':
+        return Response({"error": "Invalid content type. Only strictly PDF files are allowed."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # 3. Strict Magic Bytes Check (First 4 bytes of a typical PDF should be '%PDF')
+    magic_bytes = uploaded_file.read(4)
+    if magic_bytes != b'%PDF':
+        return Response({"error": "File signature invalid. This is not a genuine authentic PDF."}, status=status.HTTP_400_BAD_REQUEST)
+    uploaded_file.seek(0) # Reset file pointer back to start
+
+    # Basic filename validation fallback
+    if not uploaded_file.name.lower().endswith('.pdf'):
         return Response({"error": "Only PDF files are supported for parsing"}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
@@ -277,28 +295,43 @@ def upload_statement(request):
         default_method, _ = PaymentMethod.objects.get_or_create(name='Bank Transfer', defaults={'icon': 'Landmark'})
         
         created_count = 0
+        skipped_count = 0
         
         # Save them into the database securely
         for tx_data in parsed_transactions:
-            Transaction.objects.create(
-                user=request.user,
-                title=tx_data['title'],
-                amount=tx_data['amount'],
-                date=tx_data['date'],
-                transaction_type=tx_data['transaction_type'],
-                category=default_cat,
-                payment_method=default_method
-            )
-            created_count += 1
+            # 4. Sanitize Strings (Prevent XSS/Injection on title)
+            clean_title = strip_tags(tx_data['title'])[:255]
+            
+            # 5. De-Duplication Logic (Prevent accidental double uploads of the same statement)
+            exists = Transaction.objects.filter(
+                user=request.user, 
+                title=clean_title, 
+                amount=tx_data['amount'], 
+                date=tx_data['date']
+            ).exists()
+            
+            if not exists:
+                Transaction.objects.create(
+                    user=request.user,
+                    title=clean_title,
+                    amount=tx_data['amount'],
+                    date=tx_data['date'],
+                    transaction_type=tx_data['transaction_type'],
+                    category=default_cat,
+                    payment_method=default_method
+                )
+                created_count += 1
+            else:
+                skipped_count += 1
             
         return Response({
             "status": "success", 
-            "message": f"Successfully parsed and saved {created_count} transactions."
+            "message": f"Successfully imported {created_count} transactions (Skipped {skipped_count} duplicates)."
         })
         
     except Exception as e:
-        print("Upload statement error: ", str(e))
-        return Response({"error": "Failed to parse document. Please ensure it is a valid Federal Bank statement."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        print("Upload statement error: ", str(e)) # Logs to stdout instead of returning traceback to user
+        return Response({"error": "Failed to safely parse document. Ensure the file is uncorrupted and format matches."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class MonthlyBudgetView(viewsets.ViewSet):
     def list(self, request):

@@ -86,7 +86,10 @@ def parse_federal_bank_statement(pdf_file, user):
     
     # pdf_file is typically an InMemoryUploadedFile object in Django
     with pdfplumber.open(pdf_file) as pdf:
-        for page in pdf.pages:
+        # 7. Protect against massive PDF CPU DoS
+        pages_to_process = pdf.pages[:40] 
+        
+        for page in pages_to_process:
             table = page.extract_table()
             if not table:
                 continue
