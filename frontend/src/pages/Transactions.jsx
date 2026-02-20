@@ -150,7 +150,25 @@ const Transactions = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 dark:bg-gray-950">
+    <div className="min-h-screen bg-gray-50 pb-24 dark:bg-gray-950 px-0 relative">
+
+      {/* Full-screen Upload Loader Overlay */}
+      {uploading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center justify-center p-8 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 animate-in zoom-in-95 duration-200">
+            <div className="relative w-16 h-16 mb-6">
+              <div className="absolute inset-0 border-4 border-indigo-100 dark:border-indigo-900 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+              <LucideIcons.FileText className="absolute inset-0 m-auto text-indigo-600 dark:text-indigo-400 w-6 h-6 animate-pulse" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Analyzing Statement</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-[200px]">
+              Securely reading your PDF. This will only take a moment...
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white dark:bg-gray-900 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-3">
