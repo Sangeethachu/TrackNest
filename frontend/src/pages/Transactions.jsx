@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Search, ShoppingBag, TrendingDown, ArrowLeft } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { Search, ShoppingBag, TrendingDown, ArrowLeft, Upload, FileType2 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
@@ -7,6 +7,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 
 const Transactions = () => {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -97,6 +99,39 @@ const Transactions = () => {
     return <Icon size={size} />;
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      alert('Please select a valid PDF file.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setUploading(true);
+    try {
+      const response = await api.post('/upload-statement/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
+      });
+      alert(response.data.message);
+      fetchTransactions(); // Refresh the list
+    } catch (err) {
+      console.error('Failed to upload statement:', err);
+      alert(err.response?.data?.error || 'Failed to process statement. Please try again.');
+    } finally {
+      setUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -114,9 +149,30 @@ const Transactions = () => {
           </button>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">Transactions history</h1>
         </div>
-        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
-          <Search size={22} className="text-gray-700 dark:text-gray-200" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors relative"
+            title="Import Statement"
+          >
+            {uploading ? (
+              <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <Upload size={22} className="text-indigo-600 dark:text-indigo-400" />
+            )}
+            <input
+              type="file"
+              accept=".pdf"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+          </button>
+          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+            <Search size={22} className="text-gray-700 dark:text-gray-200" />
+          </button>
+        </div>
       </div>
 
       {/* Highlights */}

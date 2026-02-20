@@ -249,6 +249,57 @@ def reset_data(request):
     except Exception as e:
         return Response({'status': 'error', 'message': str(e)}, status=500)
 
+from rest_framework.parsers import MultiPartParser, FormParser
+from .utils import parse_federal_bank_statement
+
+@api_view(['POST'])
+def upload_statement(request):
+    """
+    Endpoint strictly for uploading PDF bank statements.
+    Processes the file purely in-memory, discarding it immediately after.
+    Currently specifically customized for Federal Bank statement formatting.
+    """
+    if 'file' not in request.FILES:
+        return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+        
+    uploaded_file = request.FILES['file']
+    
+    # Very basic validation
+    if not uploaded_file.name.endswith('.pdf'):
+        return Response({"error": "Only PDF files are supported for parsing"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        # Pass the in-memory file to the parser
+        parsed_transactions = parse_federal_bank_statement(uploaded_file, request.user)
+        
+        # We need a default category and payment method for statement uploads
+        default_cat, _ = Category.objects.get_or_create(name='General', defaults={'icon': 'FileText', 'budget_limit': 0})
+        default_method, _ = PaymentMethod.objects.get_or_create(name='Bank Transfer', defaults={'icon': 'Landmark'})
+        
+        created_count = 0
+        
+        # Save them into the database securely
+        for tx_data in parsed_transactions:
+            Transaction.objects.create(
+                user=request.user,
+                title=tx_data['title'],
+                amount=tx_data['amount'],
+                date=tx_data['date'],
+                transaction_type=tx_data['transaction_type'],
+                category=default_cat,
+                payment_method=default_method
+            )
+            created_count += 1
+            
+        return Response({
+            "status": "success", 
+            "message": f"Successfully parsed and saved {created_count} transactions."
+        })
+        
+    except Exception as e:
+        print("Upload statement error: ", str(e))
+        return Response({"error": "Failed to parse document. Please ensure it is a valid Federal Bank statement."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class MonthlyBudgetView(viewsets.ViewSet):
     def list(self, request):
         budget, created = MonthlyBudget.objects.get_or_create(user=request.user)
