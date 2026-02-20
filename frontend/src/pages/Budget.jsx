@@ -82,11 +82,16 @@ const Budget = () => {
   // Calculate totals
   const totalSpent = budgetStats.reduce((sum, item) => sum + item.amount, 0);
   // Chart data now just shows distribution of spent amount
-  const chartData = budgetStats.filter(item => item.amount > 0).map(item => ({
+  let chartData = budgetStats.filter(item => item.amount > 0).map(item => ({
     name: item.category,
     value: item.amount,
     color: item.color || '#cbd5e1'
   }));
+
+  const isDataEmpty = chartData.length === 0;
+  if (isDataEmpty) {
+    chartData = [{ name: 'No Spending', value: 1, color: '#f3f4f6' }];
+  }
 
   // Palette from mock data to preserve the "old UI" look
   const COLORS = ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#fb923c', '#fbbf24', '#ec4899', '#6366f1'];
@@ -131,20 +136,22 @@ const Budget = () => {
                   endAngle={0}
                   innerRadius={110}
                   outerRadius={160}
-                  paddingAngle={3}
+                  paddingAngle={isDataEmpty ? 0 : 3}
                   dataKey="value"
                   stroke="none"
                   cornerRadius={4}
                 >
                   {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell key={`cell-${index}`} fill={isDataEmpty ? '#e5e7eb' : COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip
-                  formatter={(value) => formatCurrency(value)}
-                  itemStyle={{ color: '#1f2937' }}
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                />
+                {!isDataEmpty && (
+                  <Tooltip
+                    formatter={(value) => formatCurrency(value)}
+                    itemStyle={{ color: '#1f2937' }}
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                  />
+                )}
               </PieChart>
             </ResponsiveContainer>
 
