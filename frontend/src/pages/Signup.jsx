@@ -122,17 +122,25 @@ const Signup = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center">
-                        <input
-                            id="terms"
-                            name="terms"
-                            type="checkbox"
-                            required
-                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-700 rounded"
-                        />
-                        <label htmlFor="terms" className="ml-2 block text-sm text-gray-900 dark:text-gray-400">
-                            I agree to the <a href="#" className="text-indigo-600 hover:text-indigo-500 underline decoration-indigo-500/30">Terms</a> and <a href="#" className="text-indigo-600 hover:text-indigo-500 underline decoration-indigo-500/30">Privacy Policy</a>
-                        </label>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                            <input
+                                id="terms"
+                                name="terms"
+                                type="checkbox"
+                                required
+                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-700 rounded"
+                            />
+                            <label htmlFor="terms" className="ml-2 block text-sm text-gray-900 dark:text-gray-400">
+                                I agree to the <a href="#" className="text-indigo-600 hover:text-indigo-500 underline decoration-indigo-500/30">Terms</a> and <a href="#" className="text-indigo-600 hover:text-indigo-500 underline decoration-indigo-500/30">Privacy Policy</a>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end mt-[-1rem]">
+                        <Link to="/forgot-password" class="text-xs font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">
+                            Forgot Password?
+                        </Link>
                     </div>
 
                     <button
