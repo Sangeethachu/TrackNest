@@ -451,12 +451,14 @@ class CategoryViewSet(viewsets.ModelViewSet):
         stats = []
         
         for category in categories:
-            # Calculate total spent for this category in current month
+            # Calculate total spent for this category in current month FOR THIS USER
             spent = Transaction.objects.filter(
+                user=request.user,
                 category=category,
                 transaction_type='expense',
                 date__date__gte=first_day
             ).aggregate(Sum('amount'))['amount__sum'] or 0
+
             
             stats.append({
                 'id': category.id,
