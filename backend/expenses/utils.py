@@ -74,7 +74,7 @@ def parse_sms_content(body):
 
     return data
 
-def parse_federal_bank_statement(pdf_file, user):
+def parse_federal_bank_statement(pdf_file, user, password=''):
     """
     Parses a Federal Bank PDF statement in-memory using pdfplumber.
     Returns a list of parsed transaction dicts ready for insertion.
@@ -85,7 +85,7 @@ def parse_federal_bank_statement(pdf_file, user):
     parsed_transactions = []
     
     # pdf_file is typically an InMemoryUploadedFile object in Django
-    with pdfplumber.open(pdf_file) as pdf:
+    with pdfplumber.open(pdf_file, password=password) as pdf:
         # 7. Protect against massive PDF CPU DoS
         pages_to_process = pdf.pages[:40] 
         

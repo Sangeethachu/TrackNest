@@ -108,8 +108,18 @@ const Transactions = () => {
       return;
     }
 
+    const password = window.prompt("If your PDF is password protected (like most Bank Statements), enter it here.\nIf not, just leave this blank and click OK:");
+    if (password === null) {
+      // User clicked cancel
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
     const formData = new FormData();
     formData.append('file', file);
+    if (password) {
+      formData.append('password', password);
+    }
 
     setUploading(true);
     try {

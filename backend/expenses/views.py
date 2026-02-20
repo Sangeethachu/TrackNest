@@ -287,8 +287,11 @@ def upload_statement(request):
         return Response({"error": "Only PDF files are supported for parsing"}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        # Pass the in-memory file to the parser
-        parsed_transactions = parse_federal_bank_statement(uploaded_file, request.user)
+        # Extract optional password from the request
+        pdf_password = request.data.get('password', '')
+        
+        # Pass the in-memory file to the parser securely encrypted with the user's password
+        parsed_transactions = parse_federal_bank_statement(uploaded_file, request.user, password=pdf_password)
         
         # We need a default category and payment method for statement uploads
         default_cat, _ = Category.objects.get_or_create(name='General', defaults={'icon': 'FileText', 'budget_limit': 0})
