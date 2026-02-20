@@ -95,29 +95,39 @@ def parse_federal_bank_statement(pdf_file, user, password=''):
                 continue
                 
             # Iterate through rows
-            # A typical Federal Bank table:
-            # Date | Particulars / Narration | Chq.No | Withdrawal | Deposit | Balance
+            # Authentic Federal Bank table structure:
+            # 0: Date | 1: Value Date | 2: Particulars | 3: Tran Type | 4: Tran ID | 5: Cheque Details | 6: Withdrawals | 7: Deposits | 8: Balance | 9: DR/CR
+            if not getattr(page, 'layout_checked', False):
+                # Sometimes pdfplumber extracts headers, sometimes it doesn't depending on the page
+                pass
+                
             for row in table:
                 # Basic cleaning
                 row = [str(cell).strip() if cell else "" for cell in row]
                 
-                # Check if this row looks like a data row (usually starts with a date DD-MM-YYYY)
-                if not row or len(row) < 5:
+                # Check if this row looks like a data row (usually starts with a date DD-MMM-YYYY like 10-FEB-2026)
+                if not row or len(row) < 9:
                     continue
                     
                 date_str = row[0]
                 
-                # Verify date format DD-MM-YYYY
-                if not re.match(r'\d{2}-\d{2}-\d{4}', date_str):
+                # Verify date format DD-MMM-YYYY (e.g. 10-FEB-2026)
+                if not re.match(r'\d{2}-[A-Za-z]{3}-\d{4}', date_str):
                     continue
                 
                 try:
                     # Parse Date
-                    txn_date = datetime.datetime.strptime(date_str, '%d-%m-%Y').date()
+                    txn_date = datetime.datetime.strptime(date_str, '%d-%b-%Y').date()
                     
-                    narration = row[1]
-                    withdrawal_str = row[3].replace(',', '')
-                    deposit_str = row[4].replace(',', '')
+                    # Particulars is at index 2
+                    narration = row[2]
+                    
+                    # Replace newlines in narration (sometimes multi-line cells exist)
+                    narration = " ".join(narration.split())
+                    
+                    # Withdrawals is at index 6, Deposits at index 7
+                    withdrawal_str = row[6].replace(',', '')
+                    deposit_str = row[7].replace(',', '')
                     
                     # Determine type and amount
                     amount = Decimal('0.00')
