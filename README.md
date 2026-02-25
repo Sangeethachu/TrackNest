@@ -1,0 +1,121 @@
+# 🐦 TrackNest - Smart Expense Tracker
+
+![TrackNest Banner](docs/screenshots/banner.png)
+
+TrackNest is a sleek, modern, and powerful expense tracking application designed to help you take control of your finances. With a focus on user experience and data visualization, TrackNest makes managing your money simple and intuitive.
+
+## ✨ Features
+
+- **📊 Comprehensive Dashboard**: High-level overview of your balance, monthly spend, and recent activities.
+- **📈 Advanced Analytics**: Visualize your spending patterns with interactive charts and category breakdowns.
+- **💰 Budget Management**: Set monthly spending limits and track your progress in real-time.
+- **📄 Transaction History**: Detailed log of all your incomes and expenses with easy filtering.
+- **🎯 Savings Goals**: Define and track your financial targets with progress indicators.
+- **🔔 Smart Notifications**: Stay informed about your budget status and goal achievements.
+- **📱 Responsive Design**: Fully optimized for mobile and desktop screens with a premium glassmorphic UI.
+- **🌙 Dark Mode Support**: Switch between light and dark themes for a personalized experience.
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **React.js**: Core UI framework
+- **Tailwind CSS**: Modern styling and layout
+- **Recharts**: Data visualization and analytics
+- **Lucide React**: Beautiful icons
+- **React Router**: Seamless navigation
+
+### Backend
+- **Django**: Robust Python web framework
+- **Django REST Framework**: Secure and scalable API
+- **SQLite**: Reliable local data storage (default)
+- **JWT Authentication**: Secure user sessions
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v16+)
+- Python (v3.10+)
+- npm or yarn
+
+### 🔧 Backend Setup
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Run migrations:
+   ```bash
+   python manage.py migrate
+   ```
+5. Start the development server:
+   ```bash
+   python manage.py runserver
+   ```
+
+### 🎨 Frontend Setup
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm start
+   ```
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+
+---
+
+## 📸 Screenshots
+
+| Splash Screen | Login Page | Signup Page |
+| :---: | :---: | :---: |
+| ![Splash](docs/screenshots/splash.png) | ![Login](docs/screenshots/login.png) | ![Signup](docs/screenshots/signup.png) |
+
+| Dashboard | Analytics | Transactions |
+| :---: | :---: | :---: |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Stats](docs/screenshots/stats.png) | ![Transactions](docs/screenshots/transactions.png) |
+
+| Budget Planning | Forgot Password |
+| :---: | :---: |
+| ![Budget](docs/screenshots/budget.png) | ![Forgot Password](docs/screenshots/forgot_password.png) |
+
+---
+
+## 📁 Project Structure
+
+```text
+Expenses Tracker/
+├── backend/            # Django REST API
+│   ├── expenses/       # Core app logic and models
+│   ├── expense_tracker/# Project settings
+│   └── manage.py       # Django management script
+├── frontend/           # React Application
+│   ├── src/
+│   │   ├── components/ # Reusable UI components
+│   │   ├── pages/      # View components
+│   │   └── api.js      # API interaction layer
+│   └── public/         # Static assets
+└── docs/               # Project documentation and screenshots
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License.
