@@ -195,36 +195,42 @@ const Budget = () => {
       <div className="px-6 mt-8">
         <h2 className="text-base font-semibold text-gray-900 mb-4">Today</h2>
         <div className="bg-white rounded-2xl overflow-hidden">
-          {todayTransactions.map((transaction, index) => (
-            <div
-              key={transaction.id}
-              className={`flex items-center justify-between p-4 hover:bg-gray-50 transition-colors cursor-pointer ${index !== todayTransactions.length - 1 ? 'border-b border-gray-100' : ''
-                }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
-                  {getIcon(transaction.category?.icon)}
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900 text-sm">{transaction.title}</p>
-                  <div className="flex items-center gap-1 mt-1">
-                    <div className={`w-2 h-2 rounded-full ${transaction.transaction_type === 'income' ? 'bg-green-500' : 'bg-red-500'
-                      }`} />
-                    <p className="text-xs text-gray-500">{transaction.category?.name}</p>
+          {todayTransactions.length === 0 ? (
+            <div className="p-6 text-center text-sm text-gray-500">
+              No transactions today.
+            </div>
+          ) : (
+            todayTransactions.map((transaction, index) => (
+              <div
+                key={transaction.id}
+                className={`flex items-center justify-between p-4 hover:bg-gray-50 transition-colors cursor-pointer ${index !== todayTransactions.length - 1 ? 'border-b border-gray-100' : ''
+                  }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+                    {getIcon(transaction.category?.icon)}
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 text-sm">{transaction.title}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <div className={`w-2 h-2 rounded-full ${transaction.transaction_type === 'income' ? 'bg-green-500' : 'bg-red-500'
+                        }`} />
+                      <p className="text-xs text-gray-500">{transaction.category?.name}</p>
+                    </div>
                   </div>
                 </div>
+                <div className="text-right">
+                  <p className={`font-semibold text-sm ${transaction.transaction_type === 'income' ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                    {transaction.transaction_type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {new Date(transaction.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className={`font-semibold text-sm ${transaction.transaction_type === 'income' ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                  {transaction.transaction_type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {new Date(transaction.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </p>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
