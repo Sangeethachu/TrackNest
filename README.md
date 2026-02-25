@@ -114,8 +114,10 @@ Expenses Tracker/
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+This is a private, proprietary project. Contributions, pull requests, and unauthorized modifications are strictly prohibited.
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+**All Rights Reserved.**
+
+This project and its source code are proprietary. You may not copy, download, modify, distribute, or use this code without explicit written permission from the owner.
