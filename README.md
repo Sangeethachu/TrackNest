@@ -4,16 +4,36 @@
 
 TrackNest is a sleek, modern, and powerful expense tracking application designed to help you take control of your finances. With a focus on user experience and data visualization, TrackNest makes managing your money simple and intuitive.
 
-## ✨ Features
+## ✨ Implemented Features
 
-- **📊 Comprehensive Dashboard**: High-level overview of your balance, monthly spend, and recent activities.
-- **📈 Advanced Analytics**: Visualize your spending patterns with interactive charts and category breakdowns.
-- **💰 Budget Management**: Set monthly spending limits and track your progress in real-time.
-- **📄 Transaction History**: Detailed log of all your incomes and expenses with easy filtering.
-- **🎯 Savings Goals**: Define and track your financial targets with progress indicators.
-- **🔔 Smart Notifications**: Stay informed about your budget status and goal achievements.
-- **📱 Responsive Design**: Fully optimized for mobile and desktop screens with a premium glassmorphic UI.
-- **🌙 Dark Mode Support**: Switch between light and dark themes for a personalized experience.
+### 🔹 Authentication & Security
+- **User Authentication**: Secure Sign Up, Login, and Logout functionality.
+- **Password Management**: Forgot Password and Password Reset workflows.
+- **PIN Protection**: Additional layer of security with an app-specific PIN.
+- **JWT Sessions**: Secure backend communication using JSON Web Tokens.
+
+### 🔹 Financial Tracking
+- **Transaction Logging**: Quickly add new income or expense entries.
+- **Categorization**: Group transactions by dynamically generated categories (Food, Rent, Travel, etc.).
+- **Payment Methods**: Track how you pay (Credit Card, Cash, Bank Transfer).
+- **Transaction History**: A detailed, scrollable log of all past financial activities.
+
+### 🔹 Budgeting & Goals
+- **Monthly Spending Limits**: Set a hard budget and track your spending against it.
+- **Savings Goals**: Create custom goals (e.g., "Vacation Fund", "New Car") and track progress visually.
+- **Dynamic Updates**: Budgets and goals update in real-time as new transactions are added.
+
+### 🔹 Analytics & Visualization
+- **Comprehensive Dashboard**: A bird's-eye view of your current balance, recent activity, and quick-add actions.
+- **Spending Trends**: Line charts to visualize daily spending averages over time.
+- **Category Breakdown**: Interactive doughnut charts displaying exactly where your money goes.
+- **Monthly Highlights**: Quick insights into your top spending categories.
+
+### 🔹 User Experience & Settings
+- **Profile Management**: Update your name, email, and select a customized avatar.
+- **Interactive UI**: Fluid micro-animations, glassmorphic cards, and responsive design.
+- **Dark Mode / Light Mode**: Seamless theme toggling for user preference.
+- **System Settings**: Manage notifications, app permissions, and help/support resources.
 
 ## 🛠️ Tech Stack
 
