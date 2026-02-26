@@ -23,7 +23,7 @@ const Splash = () => {
             <div className="z-10 flex flex-col items-center text-center mt-12">
                 <div className="mb-6 drop-shadow-xl animate-logo-run">
                     <img
-                        src="/app_loader_icon.png"
+                        src="/logo_white.png"
                         alt="TrackNest Logo"
                         className="w-48 h-48 object-contain"
                     />
