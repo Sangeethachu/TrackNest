@@ -2,7 +2,7 @@
 
 ![TrackNest Banner](docs/screenshots/banner.png)
 
-> **🌍 Live Demo:** [Visit TrackNest App Here](#) *(Replace with your hosted URL)*
+> **🌍 Live Demo:** [Visit TrackNest App Here](https://track-nest-fawn.vercel.app/)
 
 TrackNest is a sleek, modern, and powerful expense tracking application designed to help you take control of your finances. With a focus on user experience and data visualization, TrackNest makes managing your money simple and intuitive.
 
