@@ -99,6 +99,10 @@ TrackNest is a sleek, modern, and powerful expense tracking application designed
    ```
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
+### 🌐 Deployment (Render / Vercel)
+
+> **Tip:** To avoid backend free-tier cold starts on hosting platforms like Render, set up a free monitor at [uptimerobot.com](https://uptimerobot.com) to ping your API's health check endpoint (`/api/health-check/`) every 5 minutes.
+
 ---
 
 ## 📸 Screenshots
